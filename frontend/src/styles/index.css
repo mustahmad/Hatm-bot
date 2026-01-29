@@ -1,0 +1,176 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --tg-theme-bg-color: #f8f9fa;
+  --tg-theme-text-color: #1a1a1a;
+  --tg-theme-hint-color: #6b7280;
+  --tg-theme-link-color: #10b981;
+  --tg-theme-button-color: #10b981;
+  --tg-theme-button-text-color: #ffffff;
+  --tg-theme-secondary-bg-color: #ffffff;
+
+  /* Перламутровые цвета с радужным эффектом */
+  --pearl-light: #f8f9fc;
+  --pearl-medium: #eef1f7;
+  --pearl-shimmer: linear-gradient(
+    135deg,
+    #f8f9fc 0%,
+    #e8f4f0 15%,
+    #f0e8f4 30%,
+    #e8ecf4 45%,
+    #f4f0e8 60%,
+    #e8f4ec 75%,
+    #f8f9fc 100%
+  );
+
+  /* Зелёные акценты */
+  --green-primary: #10b981;
+  --green-secondary: #059669;
+  --green-light: #d1fae5;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Inter', system-ui, sans-serif;
+  background: var(--pearl-shimmer);
+  background-size: 400% 400%;
+  animation: pearlShimmer 15s ease infinite;
+  color: var(--tg-theme-text-color);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  min-height: 100vh;
+}
+
+@keyframes pearlShimmer {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* Glass effect */
+.glass {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.05);
+}
+
+.glass-card {
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(16, 185, 129, 0.1);
+}
+
+/* Gradient backgrounds */
+.gradient-green {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+}
+
+.gradient-green-light {
+  background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+}
+
+.gradient-orange {
+  background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+}
+
+.gradient-pearl {
+  background: var(--pearl-shimmer);
+  background-size: 200% 200%;
+  animation: pearlShimmer 10s ease infinite;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 4px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(16, 185, 129, 0.3);
+  border-radius: 2px;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-out;
+}
+
+/* Button styles */
+.btn-primary {
+  @apply px-6 py-3 rounded-2xl font-semibold text-white gradient-green
+    shadow-lg shadow-emerald-500/30 transition-all duration-200
+    active:scale-95 hover:shadow-xl hover:shadow-emerald-500/40;
+}
+
+.btn-secondary {
+  @apply px-6 py-3 rounded-2xl font-medium
+    bg-white text-emerald-700 border border-emerald-200 transition-all duration-200
+    active:scale-95 hover:bg-emerald-50;
+}
+
+/* Card styles with pearl effect */
+.card {
+  @apply rounded-3xl p-5 shadow-sm;
+  background: linear-gradient(
+    145deg,
+    rgba(255, 255, 255, 0.98) 0%,
+    rgba(248, 250, 252, 0.95) 50%,
+    rgba(240, 244, 248, 0.98) 100%
+  );
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  box-shadow:
+    0 4px 20px rgba(0, 0, 0, 0.04),
+    inset 0 1px 1px rgba(255, 255, 255, 0.9);
+}
+
+/* Input styles */
+.input {
+  @apply w-full px-4 py-3 rounded-2xl border border-gray-200
+    bg-white text-gray-900 placeholder-gray-400
+    focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500
+    transition-all duration-200;
+}
+
+/* Fix for dark placeholder visibility */
+input::placeholder,
+textarea::placeholder {
+  color: #9ca3af !important;
+  opacity: 1;
+}
+
+input,
+textarea {
+  color: #1f2937 !important;
+  background-color: #ffffff !important;
+}
+
+/* Telegram theme overrides for light mode */
+.bg-telegram-bg {
+  background: var(--pearl-shimmer) !important;
+  background-size: 400% 400%;
+  animation: pearlShimmer 15s ease infinite;
+}
