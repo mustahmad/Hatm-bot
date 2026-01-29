@@ -4,13 +4,11 @@ import { JuzAssignment } from '../api/client'
 interface CircularTrackerProps {
   juzAssignments: JuzAssignment[]
   size?: number
-  onJuzClick?: (juz: JuzAssignment) => void
 }
 
 export default function CircularTracker({
   juzAssignments,
-  size = 280,
-  onJuzClick
+  size = 280
 }: CircularTrackerProps) {
   const totalJuzs = 30
   const completedJuzs = juzAssignments.filter(j => j.status === 'completed').length

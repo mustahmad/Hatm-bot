@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
+import { useParams } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { useTelegram } from '../hooks/useTelegram'
 import { api, HatmProgress, JuzAssignment, HatmResponse } from '../api/client'
@@ -10,7 +10,6 @@ import LoadingSpinner from '../components/LoadingSpinner'
 
 export default function Hatm() {
   const { id } = useParams<{ id: string }>()
-  const navigate = useNavigate()
   const { initData, user, webApp } = useTelegram()
   const [hatm, setHatm] = useState<HatmResponse | null>(null)
   const [progress, setProgress] = useState<HatmProgress | null>(null)
@@ -161,7 +160,6 @@ export default function Hatm() {
             >
               <CircularTracker
                 juzAssignments={progress.juz_assignments}
-                onJuzClick={completeJuz}
               />
             </motion.div>
 

@@ -117,7 +117,6 @@ export default function Group() {
             <div className="flex justify-center mb-6">
               <CircularTracker
                 juzAssignments={progress?.juz_assignments || []}
-                onJuzClick={(juz) => navigate(`/hatm/${group.active_hatm!.id}`)}
               />
             </div>
 
