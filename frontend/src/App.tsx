@@ -7,6 +7,8 @@ import Hatm from './pages/Hatm'
 import CreateGroup from './pages/CreateGroup'
 import JoinGroup from './pages/JoinGroup'
 import CreateHatm from './pages/CreateHatm'
+import Profile from './pages/Profile'
+import BottomNav from './components/BottomNav'
 
 function AppContent() {
   const { webApp, ready } = useTelegram()
@@ -29,7 +31,7 @@ function AppContent() {
   }
 
   return (
-    <div className="min-h-screen bg-telegram-bg pb-safe">
+    <div className="min-h-screen bg-telegram-bg pb-20">
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/group/:id" element={<Group />} />
@@ -37,7 +39,9 @@ function AppContent() {
         <Route path="/create-group" element={<CreateGroup />} />
         <Route path="/join-group" element={<JoinGroup />} />
         <Route path="/group/:groupId/create-hatm" element={<CreateHatm />} />
+        <Route path="/profile" element={<Profile />} />
       </Routes>
+      <BottomNav />
     </div>
   )
 }

@@ -118,7 +118,7 @@ export default function Hatm() {
   return (
     <div className="min-h-screen">
       <Header
-        title="Хатм"
+        title="📖 Хатм"
         subtitle={getStatusText()}
         showBack
       />
@@ -213,7 +213,7 @@ export default function Hatm() {
               animate={{ opacity: 1 }}
               transition={{ delay: 0.3 }}
             >
-              <h3 className="text-lg font-semibold mb-4">Список джузов</h3>
+              <h3 className="text-lg font-semibold mb-4 text-green-700">Список джузов</h3>
               <JuzList
                 juzAssignments={progress.juz_assignments}
                 currentUserId={user?.id}

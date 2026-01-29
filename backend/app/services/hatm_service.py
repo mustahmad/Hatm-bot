@@ -1,3 +1,4 @@
+import random
 from sqlalchemy.orm import Session
 from typing import List, Optional
 from datetime import datetime, timedelta
@@ -62,18 +63,22 @@ class HatmService:
 
     def _distribute_juzs(self, hatm: Hatm, participants: List[User]):
         """
-        Распределить 30 джузов между участниками.
+        Распределить 30 джузов между участниками случайным образом.
         Равное распределение, остаток по одному на участников.
         """
         total_juzs = 30
         num_participants = len(participants)
+
+        # Создаём список всех джузов и перемешиваем
+        juz_numbers = list(range(1, total_juzs + 1))
+        random.shuffle(juz_numbers)
 
         # Базовое количество джузов на участника
         base_juzs = total_juzs // num_participants
         # Остаток, который нужно распределить
         remainder = total_juzs % num_participants
 
-        juz_number = 1
+        juz_index = 0
         for i, user in enumerate(participants):
             # Определяем сколько джузов получает этот участник
             juzs_for_user = base_juzs + (1 if i < remainder else 0)
@@ -82,11 +87,11 @@ class HatmService:
                 assignment = JuzAssignment(
                     hatm_id=hatm.id,
                     user_id=user.id,
-                    juz_number=juz_number,
+                    juz_number=juz_numbers[juz_index],
                     status=JuzStatus.PENDING
                 )
                 self.db.add(assignment)
-                juz_number += 1
+                juz_index += 1
 
     def get_progress(self, hatm: Hatm) -> HatmProgress:
         """Получить прогресс хатма"""

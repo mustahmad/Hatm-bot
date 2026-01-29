@@ -36,11 +36,34 @@ export default function Home() {
   return (
     <div className="min-h-screen">
       <Header
-        title={`Салям, ${user?.first_name || 'друг'}!`}
+        title={`Ассалам алейкум, ${user?.first_name || 'друг'}!`}
+        rightAction={
+          <button
+            onClick={() => navigate('/profile')}
+            className="w-10 h-10 rounded-full bg-white/80 flex items-center justify-center shadow-sm border border-gray-100"
+          >
+            <svg className="w-5 h-5 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+            </svg>
+          </button>
+        }
         subtitle="Ваши группы для хатма"
       />
 
       <div className="px-4 py-6">
+        {/* Islamic decoration */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="flex justify-center items-center gap-4 mb-6"
+        >
+          <span className="text-2xl opacity-30">☪</span>
+          <div className="h-px flex-1 bg-gradient-to-r from-transparent via-green-300 to-transparent" />
+          <span className="text-xl opacity-40">🕌</span>
+          <div className="h-px flex-1 bg-gradient-to-r from-transparent via-green-300 to-transparent" />
+          <span className="text-2xl opacity-30">☪</span>
+        </motion.div>
+
         {/* Action buttons */}
         <div className="flex gap-3 mb-6">
           <motion.button

@@ -23,10 +23,9 @@ export default function GroupCard({ group, index = 0 }: GroupCardProps) {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
           {/* Group icon */}
-          <div className="w-12 h-12 rounded-2xl gradient-green flex items-center justify-center">
-            <span className="text-white text-xl">
-              {group.name.charAt(0).toUpperCase()}
-            </span>
+          <div className="w-12 h-12 rounded-2xl gradient-green flex items-center justify-center shadow-md relative">
+            <span className="text-white text-xl">📖</span>
+            <span className="absolute -top-1 -right-1 text-xs">☪</span>
           </div>
 
           {/* Group info */}

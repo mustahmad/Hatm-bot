@@ -16,6 +16,15 @@ export default function Group() {
   const [progress, setProgress] = useState<HatmProgress | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [copied, setCopied] = useState(false)
+
+  const copyInviteCode = () => {
+    if (group) {
+      navigator.clipboard.writeText(group.invite_code)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    }
+  }
 
   useEffect(() => {
     loadGroup()
@@ -98,10 +107,10 @@ export default function Group() {
               {group.invite_code}
             </span>
             <button
-              onClick={() => navigator.clipboard.writeText(group.invite_code)}
-              className="text-green-600 text-sm font-medium"
+              onClick={copyInviteCode}
+              className={`text-sm font-medium transition-colors ${copied ? 'text-gray-500' : 'text-green-600'}`}
             >
-              Копировать
+              {copied ? 'Скопировано!' : 'Копировать'}
             </button>
           </div>
         </motion.div>
@@ -185,6 +194,21 @@ export default function Group() {
               </div>
             ))}
           </div>
+        </motion.div>
+
+        {/* Leave group button */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.3 }}
+          className="mt-8 text-center"
+        >
+          <button
+            onClick={() => navigate('/')}
+            className="text-sm text-gray-400 hover:text-gray-600 underline transition-colors"
+          >
+            Покинуть группу
+          </button>
         </motion.div>
       </div>
     </div>

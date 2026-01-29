@@ -121,9 +121,18 @@ body {
 
 /* Button styles */
 .btn-primary {
-  @apply px-6 py-3 rounded-2xl font-semibold text-white gradient-green
+  @apply px-6 py-3 rounded-2xl font-semibold text-white
     shadow-lg shadow-emerald-500/30 transition-all duration-200
     active:scale-95 hover:shadow-xl hover:shadow-emerald-500/40;
+  background: linear-gradient(135deg, #10b981 0%, #34d399 30%, #059669 70%, #10b981 100%);
+  background-size: 200% 200%;
+  animation: buttonShimmer 3s ease infinite;
+}
+
+@keyframes buttonShimmer {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
 }
 
 .btn-secondary {
