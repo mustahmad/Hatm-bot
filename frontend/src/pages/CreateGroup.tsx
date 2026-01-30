@@ -45,7 +45,7 @@ export default function CreateGroup() {
           {/* Info card */}
           <div className="card bg-green-50 border-green-100">
             <div className="flex items-start gap-3">
-              <span className="text-2xl">🕌</span>
+              <span className="text-2xl">📖</span>
               <div>
                 <h3 className="font-semibold text-gray-800">Создайте группу для хатма</h3>
                 <p className="text-sm text-gray-600 mt-1">

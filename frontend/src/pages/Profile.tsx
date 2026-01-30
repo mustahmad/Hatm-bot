@@ -164,7 +164,7 @@ export default function Profile() {
           </>
         ) : (
           <div className="text-center py-8">
-            <div className="text-6xl mb-4">🕌</div>
+            <div className="text-6xl mb-4">📖</div>
             <p className="text-gray-500">Пока нет статистики</p>
             <p className="text-sm text-gray-400 mt-2">
               Присоединитесь к хатму, чтобы начать отслеживать прогресс

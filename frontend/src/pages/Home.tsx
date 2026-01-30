@@ -51,18 +51,6 @@ export default function Home() {
       />
 
       <div className="px-4 py-6">
-        {/* Islamic decoration */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="flex justify-center items-center gap-4 mb-6"
-        >
-          <span className="text-2xl opacity-40 text-emerald-600">☪</span>
-          <div className="h-px flex-1 bg-gradient-to-r from-transparent via-emerald-300/60 to-transparent" />
-          <span className="text-xl opacity-50 text-emerald-600">🕌</span>
-          <div className="h-px flex-1 bg-gradient-to-r from-transparent via-emerald-300/60 to-transparent" />
-          <span className="text-2xl opacity-40 text-emerald-600">☪</span>
-        </motion.div>
 
         {/* Action buttons */}
         <div className="flex gap-3 mb-6">
@@ -102,7 +90,7 @@ export default function Home() {
           <div className="text-center py-8 text-red-500">{error}</div>
         ) : groups.length === 0 ? (
           <EmptyState
-            icon="🕌"
+            icon="📖"
             title="Пока нет групп"
             description="Создайте свою группу для хатма или присоединитесь к существующей"
             action={{

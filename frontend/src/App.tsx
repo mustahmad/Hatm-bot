@@ -9,7 +9,6 @@ import JoinGroup from './pages/JoinGroup'
 import CreateHatm from './pages/CreateHatm'
 import Profile from './pages/Profile'
 import BottomNav from './components/BottomNav'
-import FloatingIcons from './components/FloatingIcons'
 
 function AppContent() {
   const { webApp, ready } = useTelegram()
@@ -33,7 +32,6 @@ function AppContent() {
 
   return (
     <>
-      <FloatingIcons />
       <div className="min-h-screen bg-telegram-bg pb-20">
         <Routes>
           <Route path="/" element={<Home />} />
