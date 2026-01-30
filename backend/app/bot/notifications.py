@@ -119,3 +119,8 @@ class NotificationService:
             )
         except Exception as e:
             logger.error(f"Failed to send debt notification to user {user.telegram_id}: {e}")
+
+    async def notify_all_members_hatm_completed(self, members: List[User], hatm: Hatm, group: Group):
+        """Уведомить всех участников группы о завершении хатма"""
+        for user in members:
+            await self.notify_hatm_completed(user, hatm, group)

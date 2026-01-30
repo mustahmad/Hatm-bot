@@ -3,12 +3,14 @@ from aiogram.types import Message, CallbackQuery, InlineKeyboardMarkup, InlineKe
 from aiogram.filters import Command
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 import os
+import logging
 
 from app.database import SessionLocal
 from app.services import UserService, JuzService, HatmService, GroupService
-from app.models.models import JuzStatus, HatmStatus
+from app.models.models import JuzStatus, HatmStatus, Hatm, Group
 
 router = Router()
+logger = logging.getLogger(__name__)
 
 
 def get_db():
@@ -83,16 +85,34 @@ async def cmd_my_juzs(message: Message):
             )
             return
 
-        text = "📖 *Ваши текущие джузы:*\n\n"
+        # Группируем джузы по хатмам
+        juzs_by_hatm = {}
+        for juz in active_juzs:
+            hatm = db.query(Hatm).filter(Hatm.id == juz.hatm_id).first()
+            if hatm:
+                group = db.query(Group).filter(Group.id == hatm.group_id).first()
+                # Вычисляем номер хатма в группе
+                hatm_number = db.query(Hatm).filter(
+                    Hatm.group_id == hatm.group_id,
+                    Hatm.id <= hatm.id
+                ).count()
+                key = (hatm.id, group.name if group else "Неизвестная группа", hatm_number)
+                if key not in juzs_by_hatm:
+                    juzs_by_hatm[key] = []
+                juzs_by_hatm[key].append(juz)
 
+        text = "📖 *Ваши текущие джузы:*\n\n"
         builder = InlineKeyboardBuilder()
 
-        for juz in active_juzs:
-            text += f"• Джуз {juz.juz_number}\n"
-            builder.add(InlineKeyboardButton(
-                text=f"✅ Джуз {juz.juz_number} прочитан",
-                callback_data=f"complete_juz:{juz.id}"
-            ))
+        for (hatm_id, group_name, hatm_number), juzs in juzs_by_hatm.items():
+            text += f"🕌 *{group_name}* (Хатм #{hatm_number})\n"
+            for juz in juzs:
+                text += f"  • Джуз {juz.juz_number}\n"
+                builder.add(InlineKeyboardButton(
+                    text=f"✅ Джуз {juz.juz_number} ({group_name})",
+                    callback_data=f"complete_juz:{juz.id}"
+                ))
+            text += "\n"
 
         builder.adjust(1)
 
@@ -124,20 +144,36 @@ async def cmd_debts(message: Message):
             await message.answer("✨ У вас нет долгов! Машаллах!")
             return
 
-        text = "⚠️ *Ваши долги:*\n\n"
+        # Группируем долги по хатмам
+        debts_by_hatm = {}
+        for debt in debts:
+            hatm = db.query(Hatm).filter(Hatm.id == debt.hatm_id).first()
+            if hatm:
+                group = db.query(Group).filter(Group.id == hatm.group_id).first()
+                hatm_number = db.query(Hatm).filter(
+                    Hatm.group_id == hatm.group_id,
+                    Hatm.id <= hatm.id
+                ).count()
+                key = (hatm.id, group.name if group else "Неизвестная группа", hatm_number)
+                if key not in debts_by_hatm:
+                    debts_by_hatm[key] = []
+                debts_by_hatm[key].append(debt)
 
+        text = "⚠️ *Ваши долги:*\n\n"
         builder = InlineKeyboardBuilder()
 
-        for debt in debts:
-            text += f"• Джуз {debt.juz_number}\n"
-            builder.add(InlineKeyboardButton(
-                text=f"✅ Джуз {debt.juz_number} прочитан",
-                callback_data=f"complete_juz:{debt.id}"
-            ))
+        for (hatm_id, group_name, hatm_number), group_debts in debts_by_hatm.items():
+            text += f"🕌 *{group_name}* (Хатм #{hatm_number})\n"
+            for debt in group_debts:
+                text += f"  • Джуз {debt.juz_number}\n"
+                builder.add(InlineKeyboardButton(
+                    text=f"✅ Джуз {debt.juz_number} ({group_name})",
+                    callback_data=f"complete_juz:{debt.id}"
+                ))
+            text += "\n"
 
         builder.adjust(1)
-
-        text += f"\nВсего долгов: {len(debts)}"
+        text += f"Всего долгов: {len(debts)}"
 
         await message.answer(
             text,
@@ -172,16 +208,34 @@ async def callback_my_juzs(callback: CallbackQuery):
             )
             return
 
-        text = "📖 *Ваши текущие джузы:*\n\n"
+        # Группируем джузы по хатмам
+        juzs_by_hatm = {}
+        for juz in active_juzs:
+            hatm = db.query(Hatm).filter(Hatm.id == juz.hatm_id).first()
+            if hatm:
+                group = db.query(Group).filter(Group.id == hatm.group_id).first()
+                # Вычисляем номер хатма в группе
+                hatm_number = db.query(Hatm).filter(
+                    Hatm.group_id == hatm.group_id,
+                    Hatm.id <= hatm.id
+                ).count()
+                key = (hatm.id, group.name if group else "Неизвестная группа", hatm_number)
+                if key not in juzs_by_hatm:
+                    juzs_by_hatm[key] = []
+                juzs_by_hatm[key].append(juz)
 
+        text = "📖 *Ваши текущие джузы:*\n\n"
         builder = InlineKeyboardBuilder()
 
-        for juz in active_juzs:
-            text += f"• Джуз {juz.juz_number}\n"
-            builder.add(InlineKeyboardButton(
-                text=f"✅ Джуз {juz.juz_number} прочитан",
-                callback_data=f"complete_juz:{juz.id}"
-            ))
+        for (hatm_id, group_name, hatm_number), juzs in juzs_by_hatm.items():
+            text += f"🕌 *{group_name}* (Хатм #{hatm_number})\n"
+            for juz in juzs:
+                text += f"  • Джуз {juz.juz_number}\n"
+                builder.add(InlineKeyboardButton(
+                    text=f"✅ Джуз {juz.juz_number} ({group_name})",
+                    callback_data=f"complete_juz:{juz.id}"
+                ))
+            text += "\n"
 
         builder.adjust(1)
 
@@ -215,20 +269,36 @@ async def callback_my_debts(callback: CallbackQuery):
             await callback.message.answer("✨ У вас нет долгов! Машаллах!")
             return
 
-        text = "⚠️ *Ваши долги:*\n\n"
+        # Группируем долги по хатмам
+        debts_by_hatm = {}
+        for debt in debts:
+            hatm = db.query(Hatm).filter(Hatm.id == debt.hatm_id).first()
+            if hatm:
+                group = db.query(Group).filter(Group.id == hatm.group_id).first()
+                hatm_number = db.query(Hatm).filter(
+                    Hatm.group_id == hatm.group_id,
+                    Hatm.id <= hatm.id
+                ).count()
+                key = (hatm.id, group.name if group else "Неизвестная группа", hatm_number)
+                if key not in debts_by_hatm:
+                    debts_by_hatm[key] = []
+                debts_by_hatm[key].append(debt)
 
+        text = "⚠️ *Ваши долги:*\n\n"
         builder = InlineKeyboardBuilder()
 
-        for debt in debts:
-            text += f"• Джуз {debt.juz_number}\n"
-            builder.add(InlineKeyboardButton(
-                text=f"✅ Джуз {debt.juz_number} прочитан",
-                callback_data=f"complete_juz:{debt.id}"
-            ))
+        for (hatm_id, group_name, hatm_number), group_debts in debts_by_hatm.items():
+            text += f"🕌 *{group_name}* (Хатм #{hatm_number})\n"
+            for debt in group_debts:
+                text += f"  • Джуз {debt.juz_number}\n"
+                builder.add(InlineKeyboardButton(
+                    text=f"✅ Джуз {debt.juz_number} ({group_name})",
+                    callback_data=f"complete_juz:{debt.id}"
+                ))
+            text += "\n"
 
         builder.adjust(1)
-
-        text += f"\nВсего долгов: {len(debts)}"
+        text += f"Всего долгов: {len(debts)}"
 
         await callback.message.answer(
             text,
@@ -249,6 +319,7 @@ async def callback_complete_juz(callback: CallbackQuery):
         user_service = UserService(db)
         juz_service = JuzService(db)
         hatm_service = HatmService(db)
+        group_service = GroupService(db)
 
         user = user_service.get_by_telegram_id(callback.from_user.id)
         if not user:
@@ -273,15 +344,42 @@ async def callback_complete_juz(callback: CallbackQuery):
         # Проверяем, завершен ли хатм
         hatm = hatm_service.get_by_id(juz.hatm_id)
         hatm_completed = False
+        group = None
         if hatm:
             hatm_completed = hatm_service.check_and_complete(hatm)
+            group = db.query(Group).filter(Group.id == hatm.group_id).first()
 
         await callback.answer("Джуз отмечен как прочитанный! Баракаллаху фикум! 🤲", show_alert=True)
 
+        # Получаем название группы для сообщения
+        group_name = group.name if group else "группы"
+
         # Обновляем сообщение
         await callback.message.edit_text(
-            f"✅ Джуз {juz.juz_number} отмечен как прочитанный!\n\n"
+            f"✅ Джуз {juz.juz_number} ({group_name}) отмечен как прочитанный!\n\n"
             f"{'🎉 Хатм завершен! Аллахумма баракалана!' if hatm_completed else 'Продолжайте в том же духе!'}"
         )
+
+        # Если хатм завершен, отправляем уведомления всем участникам
+        if hatm_completed and group:
+            try:
+                members = group_service.get_members(group)
+                for member in members:
+                    if member.telegram_id and member.telegram_id != callback.from_user.id:
+                        try:
+                            await callback.bot.send_message(
+                                chat_id=member.telegram_id,
+                                text=(
+                                    f"🎉 *Хатм завершен!*\n\n"
+                                    f"Группа: {group.name}\n\n"
+                                    f"Аллахумма баракалана! Хатм группы успешно завершен!\n"
+                                    f"Баракаллаху фикум всем участникам! 🤲"
+                                ),
+                                parse_mode="Markdown"
+                            )
+                        except Exception as e:
+                            logger.error(f"Failed to notify user {member.telegram_id}: {e}")
+            except Exception as e:
+                logger.error(f"Failed to send hatm completion notifications: {e}")
     finally:
         db.close()

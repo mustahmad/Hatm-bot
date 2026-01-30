@@ -202,7 +202,8 @@ async def get_group_members(
 async def leave_group(
     group_id: int,
     current_user: User = Depends(get_current_user),
-    group_service: GroupService = Depends(get_group_service)
+    group_service: GroupService = Depends(get_group_service),
+    db: Session = Depends(get_db)
 ):
     """Покинуть группу"""
     group = group_service.get_by_id(group_id)
@@ -219,12 +220,11 @@ async def leave_group(
             detail="Нельзя покинуть группу с активным хатмом"
         )
 
-    # Нельзя покинуть группу если ты создатель
+    # Если это создатель — удаляем всю группу
     if group.creator_id == current_user.id:
-        raise HTTPException(
-            status_code=400,
-            detail="Создатель не может покинуть группу. Передайте права или удалите группу."
-        )
+        db.delete(group)
+        db.commit()
+        return {"message": "Группа удалена"}
 
     group_service.remove_member(group, current_user)
     return {"message": "Вы покинули группу"}
@@ -236,9 +236,11 @@ async def leave_group(
 async def create_hatm(
     group_id: int,
     hatm_data: HatmCreate,
+    background_tasks: BackgroundTasks,
     current_user: User = Depends(get_current_user),
     group_service: GroupService = Depends(get_group_service),
-    hatm_service: HatmService = Depends(get_hatm_service)
+    hatm_service: HatmService = Depends(get_hatm_service),
+    db: Session = Depends(get_db)
 ):
     """Создать новый хатм в группе"""
     group = group_service.get_by_id(group_id)
@@ -252,6 +254,34 @@ async def create_hatm(
         raise HTTPException(status_code=400, detail="В группе уже есть активный хатм")
 
     hatm = hatm_service.create(group, hatm_data)
+
+    # Отправляем уведомления участникам о назначенных джузах в фоне
+    async def send_hatm_notifications():
+        notification_service = get_notification_service()
+        if notification_service:
+            # Получаем всех участников и их джузы
+            members = group_service.get_members(group)
+            juz_assignments = db.query(JuzAssignment).filter(JuzAssignment.hatm_id == hatm.id).all()
+
+            # Группируем джузы по пользователям
+            user_juzs = {}
+            for juz in juz_assignments:
+                if juz.user_id not in user_juzs:
+                    user_juzs[juz.user_id] = []
+                user_juzs[juz.user_id].append(juz)
+
+            # Отправляем уведомления каждому участнику
+            for member in members:
+                if member.id in user_juzs and member.telegram_id:
+                    await notification_service.notify_juz_assigned(
+                        user=member,
+                        juz_assignments=user_juzs[member.id],
+                        hatm=hatm,
+                        group=group
+                    )
+
+    background_tasks.add_task(send_hatm_notifications)
+
     return HatmResponse(
         id=hatm.id,
         group_id=hatm.group_id,
