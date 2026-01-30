@@ -46,44 +46,50 @@
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Inter', system-ui, sans-serif;
   background: var(--pearl-shimmer);
-  background-size: 400% 400%;
-  animation: pearlShimmer 20s ease infinite;
+  background-size: 200% 200%; /* Уменьшено для лучшей производительности */
+  animation: pearlShimmer 30s ease infinite; /* Замедлено для меньшей нагрузки */
   color: var(--tg-theme-text-color);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   min-height: 100vh;
   position: relative;
   overflow-x: hidden;
+  /* Оптимизация скролла на мобильных */
+  -webkit-overflow-scrolling: touch;
 }
 
-/* Очень мягкие размытые блобы на фоне */
+/* Оптимизированные блобы на фоне - уменьшен blur и размер для производительности */
 body::before,
 body::after {
   content: '';
   position: fixed;
   border-radius: 50%;
-  filter: blur(100px);
-  opacity: 0.25;
+  filter: blur(60px); /* Уменьшено с 100px */
+  opacity: 0.2;
   pointer-events: none;
   z-index: 0;
+  /* GPU ускорение */
+  transform: translateZ(0);
+  will-change: transform;
+  contain: layout style;
 }
 
 body::before {
-  width: 400px;
-  height: 400px;
-  background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 50%, #6ee7b7 100%);
-  top: -100px;
-  right: -100px;
-  animation: floatBlob1 25s ease-in-out infinite;
+  width: 300px; /* Уменьшено с 400px */
+  height: 300px;
+  background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+  top: -80px;
+  right: -80px;
+  animation: floatBlob1 40s ease-in-out infinite; /* Замедлено с 25s */
 }
 
 body::after {
-  width: 350px;
-  height: 350px;
-  background: linear-gradient(135deg, #ccfbf1 0%, #99f6e4 50%, #5eead4 100%);
-  bottom: -80px;
-  left: -80px;
-  animation: floatBlob2 20s ease-in-out infinite;
+  width: 250px; /* Уменьшено с 350px */
+  height: 250px;
+  background: linear-gradient(135deg, #ccfbf1 0%, #5eead4 100%);
+  bottom: -60px;
+  left: -60px;
+  animation: floatBlob2 35s ease-in-out infinite; /* Замедлено с 20s */
 }
 
 @keyframes pearlShimmer {
@@ -93,32 +99,31 @@ body::after {
 }
 
 @keyframes floatBlob1 {
-  0%, 100% { transform: translate(0, 0) scale(1); }
-  25% { transform: translate(-30px, 30px) scale(1.05); }
-  50% { transform: translate(-20px, 60px) scale(0.95); }
-  75% { transform: translate(20px, 30px) scale(1.02); }
+  0%, 100% { transform: translateZ(0) translate(0, 0); }
+  50% { transform: translateZ(0) translate(-15px, 30px); }
 }
 
 @keyframes floatBlob2 {
-  0%, 100% { transform: translate(0, 0) scale(1); }
-  33% { transform: translate(40px, -30px) scale(1.08); }
-  66% { transform: translate(20px, -50px) scale(0.92); }
+  0%, 100% { transform: translateZ(0) translate(0, 0); }
+  50% { transform: translateZ(0) translate(20px, -25px); }
 }
 
-/* Glass effect */
+/* Glass effect - оптимизировано для мобильных */
 .glass {
-  background: rgba(255, 255, 255, 0.85);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  background: rgba(255, 255, 255, 0.92); /* Увеличена непрозрачность, уменьшен blur */
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   border: 1px solid rgba(255, 255, 255, 0.5);
-  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+  transform: translateZ(0); /* GPU ускорение */
 }
 
 .glass-card {
-  background: rgba(255, 255, 255, 0.9);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   border: 1px solid rgba(16, 185, 129, 0.1);
+  transform: translateZ(0);
 }
 
 /* Gradient backgrounds */
@@ -135,9 +140,8 @@ body::after {
 }
 
 .gradient-pearl {
-  background: var(--pearl-shimmer);
-  background-size: 200% 200%;
-  animation: pearlShimmer 10s ease infinite;
+  background: linear-gradient(135deg, #fdfffe 0%, #f5faf8 50%, #fdfffe 100%);
+  /* Убрана анимация для производительности */
 }
 
 /* Custom scrollbar */
@@ -170,157 +174,104 @@ body::after {
   animation: fadeIn 0.3s ease-out;
 }
 
-/* Button styles */
+/* Button styles - оптимизировано */
 .btn-primary {
   @apply px-6 py-3 rounded-2xl font-semibold text-white
-    transition-all duration-300
+    transition-shadow duration-150
     active:scale-95;
-  background: linear-gradient(135deg, #10b981 0%, #34d399 25%, #6ee7b7 50%, #34d399 75%, #10b981 100%);
-  background-size: 300% 300%;
-  animation: pearlButtonShimmer 4s ease infinite;
-  box-shadow:
-    0 4px 15px rgba(16, 185, 129, 0.35),
-    0 2px 4px rgba(0, 0, 0, 0.05),
-    inset 0 1px 1px rgba(255, 255, 255, 0.4);
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+  transform: translateZ(0);
 }
 
 .btn-primary:hover {
-  box-shadow:
-    0 6px 25px rgba(16, 185, 129, 0.45),
-    0 4px 8px rgba(0, 0, 0, 0.08),
-    inset 0 1px 1px rgba(255, 255, 255, 0.4);
-}
-
-@keyframes pearlButtonShimmer {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
+  box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
 }
 
 .btn-secondary {
   @apply px-6 py-3 rounded-2xl font-medium
-    text-emerald-700 transition-all duration-200
+    text-emerald-700 transition-shadow duration-150
     active:scale-95;
-  background: rgba(255, 255, 255, 0.9);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   border: 1px solid rgba(16, 185, 129, 0.2);
-  box-shadow:
-    0 2px 10px rgba(0, 0, 0, 0.04),
-    inset 0 1px 1px rgba(255, 255, 255, 0.8);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+  transform: translateZ(0);
 }
 
 .btn-secondary:hover {
-  background: rgba(240, 253, 244, 0.95);
+  background: rgba(240, 253, 244, 0.98);
   border-color: rgba(16, 185, 129, 0.3);
 }
 
-/* Liquid Glass Card Effect */
+/* Liquid Glass Card Effect - оптимизировано */
 .card {
   @apply rounded-3xl p-5;
   background: linear-gradient(
     145deg,
-    rgba(255, 255, 255, 0.7) 0%,
-    rgba(255, 255, 255, 0.5) 50%,
-    rgba(248, 253, 250, 0.6) 100%
-  );
-  backdrop-filter: blur(20px) saturate(180%);
-  -webkit-backdrop-filter: blur(20px) saturate(180%);
-  border: 1px solid rgba(255, 255, 255, 0.6);
-  box-shadow:
-    0 8px 32px rgba(16, 185, 129, 0.08),
-    0 2px 8px rgba(0, 0, 0, 0.04),
-    inset 0 1px 0 rgba(255, 255, 255, 0.8),
-    inset 0 -1px 0 rgba(255, 255, 255, 0.4);
-  transition: all 0.3s ease;
-}
-
-.card:hover {
-  background: linear-gradient(
-    145deg,
-    rgba(255, 255, 255, 0.8) 0%,
-    rgba(255, 255, 255, 0.6) 50%,
-    rgba(248, 253, 250, 0.7) 100%
-  );
-  box-shadow:
-    0 12px 40px rgba(16, 185, 129, 0.12),
-    0 4px 12px rgba(0, 0, 0, 0.06),
-    inset 0 1px 0 rgba(255, 255, 255, 0.9),
-    inset 0 -1px 0 rgba(255, 255, 255, 0.5);
-}
-
-/* Liquid Glass Nav */
-.glass-nav {
-  background: linear-gradient(
-    180deg,
     rgba(255, 255, 255, 0.85) 0%,
     rgba(255, 255, 255, 0.75) 100%
   );
-  backdrop-filter: blur(24px) saturate(200%);
-  -webkit-backdrop-filter: blur(24px) saturate(200%);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  box-shadow:
+    0 4px 20px rgba(16, 185, 129, 0.06),
+    0 2px 6px rgba(0, 0, 0, 0.03);
+  transition: box-shadow 0.2s ease;
+  transform: translateZ(0);
+  contain: layout style;
+}
+
+.card:hover {
+  box-shadow:
+    0 8px 30px rgba(16, 185, 129, 0.1),
+    0 4px 10px rgba(0, 0, 0, 0.05);
+}
+
+/* Liquid Glass Nav - оптимизировано */
+.glass-nav {
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   border-top: 1px solid rgba(255, 255, 255, 0.7);
-  box-shadow:
-    0 -8px 32px rgba(0, 0, 0, 0.06),
-    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.05);
+  transform: translateZ(0);
 }
 
-/* Liquid Glass Header */
+/* Liquid Glass Header - оптимизировано */
 .glass-header {
-  background: linear-gradient(
-    145deg,
-    rgba(255, 255, 255, 0.75) 0%,
-    rgba(255, 255, 255, 0.6) 50%,
-    rgba(248, 253, 250, 0.65) 100%
-  );
-  backdrop-filter: blur(24px) saturate(180%);
-  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   border: 1px solid rgba(255, 255, 255, 0.5);
-  box-shadow:
-    0 8px 32px rgba(16, 185, 129, 0.1),
-    0 2px 8px rgba(0, 0, 0, 0.05),
-    inset 0 1px 0 rgba(255, 255, 255, 0.8),
-    inset 0 -1px 0 rgba(255, 255, 255, 0.4);
+  box-shadow: 0 4px 20px rgba(16, 185, 129, 0.08);
+  transform: translateZ(0);
 }
 
-/* Liquid Glass Button */
+/* Liquid Glass Button - оптимизировано */
 .glass-button {
-  background: linear-gradient(
-    145deg,
-    rgba(255, 255, 255, 0.7) 0%,
-    rgba(255, 255, 255, 0.5) 100%
-  );
-  backdrop-filter: blur(12px) saturate(150%);
-  -webkit-backdrop-filter: blur(12px) saturate(150%);
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   border: 1px solid rgba(255, 255, 255, 0.5);
-  box-shadow:
-    0 4px 16px rgba(0, 0, 0, 0.05),
-    inset 0 1px 0 rgba(255, 255, 255, 0.8);
-  transition: all 0.2s ease;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+  transition: box-shadow 0.15s ease;
+  transform: translateZ(0);
 }
 
 .glass-button:hover {
-  background: linear-gradient(
-    145deg,
-    rgba(255, 255, 255, 0.85) 0%,
-    rgba(255, 255, 255, 0.65) 100%
-  );
-  box-shadow:
-    0 6px 20px rgba(0, 0, 0, 0.08),
-    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
 }
 
-/* Glass Active State (for nav buttons) */
+/* Glass Active State (for nav buttons) - оптимизировано */
 .glass-active {
-  background: linear-gradient(
-    145deg,
-    rgba(16, 185, 129, 0.9) 0%,
-    rgba(5, 150, 105, 0.85) 100%
-  );
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  box-shadow:
-    0 4px 20px rgba(16, 185, 129, 0.35),
-    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  box-shadow: 0 4px 16px rgba(16, 185, 129, 0.3);
+  transform: translateZ(0);
 }
 
 /* Input styles */
@@ -349,7 +300,7 @@ textarea {
   background: transparent !important;
 }
 
-/* Floating Icons */
+/* Floating Icons - оптимизированные CSS анимации */
 .floating-icons-container {
   position: fixed;
   top: 0;
@@ -359,79 +310,74 @@ textarea {
   pointer-events: none;
   z-index: 1;
   overflow: hidden;
+  contain: layout style;
 }
 
-.floating-icon {
-  position: absolute;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 44px;
-  height: 44px;
-  border-radius: 12px;
-  background: rgba(255, 255, 255, 0.5);
-  backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
-  box-shadow: 0 2px 10px rgba(16, 185, 129, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.4);
-  color: #10b981;
-  opacity: 0.35;
-  font-size: 18px;
-  animation: floatIcon 12s ease-in-out infinite;
+/* Оптимизированные плавающие иконки - без backdrop-filter */
+.floating-icon-optimized {
+  animation: floatIconOptimized 20s ease-in-out infinite;
+  will-change: transform;
+  contain: layout style;
 }
 
-.floating-icon svg {
-  width: 20px;
-  height: 20px;
-  stroke: #10b981;
-  stroke-width: 1.5;
+@keyframes floatIconOptimized {
+  0%, 100% { transform: translateZ(0) translateY(0); }
+  50% { transform: translateZ(0) translateY(-5px); }
 }
-
-.floating-icon--left {
-  left: 12px;
-}
-
-.floating-icon--right {
-  right: 12px;
-}
-
-@keyframes floatIcon {
-  0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-12px); }
-}
-
-.floating-icon:nth-child(1) { animation-delay: 0s; }
-.floating-icon:nth-child(2) { animation-delay: -1.5s; }
-.floating-icon:nth-child(3) { animation-delay: -3s; }
-.floating-icon:nth-child(4) { animation-delay: -4.5s; }
-.floating-icon:nth-child(5) { animation-delay: -6s; }
-.floating-icon:nth-child(6) { animation-delay: -2s; }
-.floating-icon:nth-child(7) { animation-delay: -5s; }
-.floating-icon:nth-child(8) { animation-delay: -3.5s; }
 
 /* Main content should be above floating icons */
 #root {
   position: relative;
   z-index: 2;
+  /* Оптимизация скролла */
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
 }
 
-/* Pearl glow effects */
+/* Оптимизация скролла для всех прокручиваемых контейнеров */
+[data-scroll-container],
+.overflow-y-auto,
+.overflow-auto {
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  transform: translateZ(0);
+}
+
+/* Отключаем сложные эффекты во время скролла на мобильных */
+@media (hover: none) and (pointer: coarse) {
+  .card,
+  .glass,
+  .glass-card,
+  .glass-nav,
+  .glass-header,
+  .glass-button {
+    /* Упрощаем backdrop-filter на мобильных */
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+  }
+
+  /* Отключаем анимацию градиента на body для мобильных */
+  body {
+    animation: none;
+    background: linear-gradient(135deg, #fdfffe 0%, #f5faf8 50%, #fdfffe 100%);
+    background-size: 100% 100%;
+  }
+
+  /* Упрощаем блобы на мобильных */
+  body::before,
+  body::after {
+    filter: blur(40px);
+    animation-play-state: paused;
+  }
+}
+
+/* Pearl glow effects - упрощено */
 .pearl-glow {
   position: relative;
+  box-shadow: 0 0 20px rgba(16, 185, 129, 0.15);
 }
 
-.pearl-glow::before {
-  content: '';
-  position: absolute;
-  inset: -2px;
-  background: linear-gradient(135deg, #a7f3d0, #6ee7b7, #34d399, #10b981);
-  border-radius: inherit;
-  opacity: 0.3;
-  filter: blur(8px);
-  z-index: -1;
-}
-
-/* Исламские иконки на фоне */
+/* Исламские иконки на фоне - оптимизировано */
 .islamic-bg-pattern {
   position: fixed;
   top: 0;
@@ -441,13 +387,16 @@ textarea {
   pointer-events: none;
   z-index: 0;
   overflow: hidden;
+  contain: layout style;
 }
 
 .islamic-bg-icon {
   position: absolute;
   opacity: 0.04;
   color: #10b981;
-  animation: floatIconSlow 20s ease-in-out infinite;
+  animation: floatIconSlow 30s ease-in-out infinite;
+  will-change: transform;
+  transform: translateZ(0);
 }
 
 .islamic-bg-icon svg {
@@ -455,75 +404,14 @@ textarea {
   height: 100%;
 }
 
-.islamic-bg-icon--1 {
-  width: 80px;
-  height: 80px;
-  top: 10%;
-  left: 5%;
-  animation-delay: 0s;
-}
-
-.islamic-bg-icon--2 {
-  width: 60px;
-  height: 60px;
-  top: 25%;
-  right: 8%;
-  animation-delay: -3s;
-}
-
-.islamic-bg-icon--3 {
-  width: 70px;
-  height: 70px;
-  top: 45%;
-  left: 10%;
-  animation-delay: -6s;
-}
-
-.islamic-bg-icon--4 {
-  width: 50px;
-  height: 50px;
-  top: 60%;
-  right: 15%;
-  animation-delay: -9s;
-}
-
-.islamic-bg-icon--5 {
-  width: 65px;
-  height: 65px;
-  top: 75%;
-  left: 8%;
-  animation-delay: -12s;
-}
-
-.islamic-bg-icon--6 {
-  width: 55px;
-  height: 55px;
-  top: 85%;
-  right: 5%;
-  animation-delay: -15s;
-}
-
-.islamic-bg-icon--7 {
-  width: 45px;
-  height: 45px;
-  top: 5%;
-  right: 25%;
-  animation-delay: -4s;
-}
-
-.islamic-bg-icon--8 {
-  width: 75px;
-  height: 75px;
-  top: 35%;
-  right: 3%;
-  animation-delay: -8s;
-}
+.islamic-bg-icon--1 { width: 80px; height: 80px; top: 10%; left: 5%; animation-delay: 0s; }
+.islamic-bg-icon--2 { width: 60px; height: 60px; top: 25%; right: 8%; animation-delay: -5s; }
+.islamic-bg-icon--3 { width: 70px; height: 70px; top: 45%; left: 10%; animation-delay: -10s; }
+.islamic-bg-icon--4 { width: 50px; height: 50px; top: 60%; right: 15%; animation-delay: -15s; }
+.islamic-bg-icon--5 { width: 65px; height: 65px; top: 75%; left: 8%; animation-delay: -20s; }
+.islamic-bg-icon--6 { width: 55px; height: 55px; top: 85%; right: 5%; animation-delay: -25s; }
 
 @keyframes floatIconSlow {
-  0%, 100% {
-    transform: translateY(0) rotate(0deg);
-  }
-  50% {
-    transform: translateY(-15px) rotate(5deg);
-  }
+  0%, 100% { transform: translateZ(0) translateY(0); }
+  50% { transform: translateZ(0) translateY(-8px); }
 }

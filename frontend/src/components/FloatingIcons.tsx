@@ -1,26 +1,13 @@
-import { motion } from 'framer-motion'
-
-// Исламские иконки - начинаются ниже хедера (с 25%)
+// Оптимизированные иконки - используем CSS анимации для GPU ускорения
+// Framer Motion удален - CSS анимации работают на GPU и не блокируют главный поток
+// Уменьшено количество иконок с 10 до 6 для лучшей производительности на мобильных
 const icons = [
-  // Верхний ряд (после хедера)
-  { style: { top: '26%', left: '5%', width: 22, height: 22 }, type: 'crescent' },
-  { style: { top: '28%', right: '8%', width: 20, height: 20 }, type: 'star' },
-
-  // Центр-верх
-  { style: { top: '38%', left: '8%', width: 24, height: 24 }, type: 'lantern' },
-  { style: { top: '35%', right: '12%', width: 22, height: 22 }, type: 'mosque' },
-
-  // Центр
-  { style: { top: '48%', left: '6%', width: 20, height: 20 }, type: 'star' },
-  { style: { top: '50%', right: '6%', width: 24, height: 24 }, type: 'quran' },
-
-  // Центр-низ
-  { style: { top: '60%', left: '10%', width: 22, height: 22 }, type: 'beads' },
-  { style: { top: '58%', right: '10%', width: 20, height: 20 }, type: 'crescent' },
-
-  // Нижняя часть
-  { style: { top: '70%', left: '5%', width: 24, height: 24 }, type: 'mosque' },
-  { style: { top: '72%', right: '8%', width: 22, height: 22 }, type: 'lantern' },
+  { style: { top: '26%', left: '5%', width: 22, height: 22 }, type: 'crescent', delay: 0 },
+  { style: { top: '28%', right: '8%', width: 20, height: 20 }, type: 'star', delay: 1 },
+  { style: { top: '45%', left: '8%', width: 24, height: 24 }, type: 'lantern', delay: 2 },
+  { style: { top: '48%', right: '6%', width: 24, height: 24 }, type: 'quran', delay: 3 },
+  { style: { top: '68%', left: '5%', width: 22, height: 22 }, type: 'mosque', delay: 4 },
+  { style: { top: '70%', right: '8%', width: 20, height: 20 }, type: 'beads', delay: 5 },
 ]
 
 const iconSvgs: Record<string, JSX.Element> = {
@@ -77,36 +64,29 @@ const iconSvgs: Record<string, JSX.Element> = {
 
 export default function FloatingIcons() {
   return (
-    <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
+    <div
+      className="fixed inset-0 pointer-events-none z-0 overflow-hidden"
+      style={{
+        willChange: 'auto',
+        contain: 'layout style paint'
+      }}
+    >
       {icons.map((item, index) => (
-        <motion.div
+        <div
           key={index}
-          className="absolute text-emerald-600"
-          style={{ ...item.style, opacity: 0.12 }}
-          initial={{ opacity: 0 }}
-          animate={{
+          className="absolute text-emerald-600 floating-icon-optimized"
+          style={{
+            ...item.style,
             opacity: 0.12,
-            y: [0, -6, 0],
-            rotate: [0, index % 2 === 0 ? 3 : -3, 0],
-          }}
-          transition={{
-            opacity: { duration: 0.8, delay: index * 0.05 },
-            y: {
-              duration: 10 + (index % 5) * 2,
-              repeat: Infinity,
-              ease: 'easeInOut',
-              delay: index * 0.2
-            },
-            rotate: {
-              duration: 15 + (index % 3) * 3,
-              repeat: Infinity,
-              ease: 'easeInOut',
-              delay: index * 0.15
-            }
+            // GPU ускорение
+            transform: 'translateZ(0)',
+            willChange: 'transform',
+            // CSS animation с задержкой
+            animationDelay: `${item.delay * -2}s`
           }}
         >
           {iconSvgs[item.type]}
-        </motion.div>
+        </div>
       ))}
     </div>
   )
