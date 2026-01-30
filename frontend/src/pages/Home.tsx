@@ -55,11 +55,9 @@ export default function Home() {
             </div>
             <button
               onClick={() => navigate('/profile')}
-              className="w-12 h-12 rounded-full bg-emerald-500 flex items-center justify-center shadow-lg"
+              className="w-12 h-12 rounded-full overflow-hidden shadow-lg"
             >
-              <span className="text-white text-lg font-semibold">
-                {(user?.first_name || 'U').charAt(0).toUpperCase()}
-              </span>
+              <img src="/logo.png" alt="Logo" className="w-full h-full object-cover" />
             </button>
           </div>
         </div>

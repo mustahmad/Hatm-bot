@@ -168,31 +168,77 @@ export default function DailyCard() {
   const [selectedArticle, setSelectedArticle] = useState<DailyItem | null>(null)
   const [currentIndex, setCurrentIndex] = useState(0)
   const scrollRef = useRef<HTMLDivElement>(null)
+  const isScrolling = useRef(false)
+
+  // Создаём расширенный массив для бесконечного скролла: [последний, ...все, первый]
+  const extendedItems = [
+    dailyItems[dailyItems.length - 1],
+    ...dailyItems,
+    dailyItems[0]
+  ]
+
+  // Инициализация: скроллим к первому реальному элементу
+  useEffect(() => {
+    if (scrollRef.current) {
+      const cardWidth = scrollRef.current.scrollWidth / extendedItems.length
+      scrollRef.current.scrollTo({ left: cardWidth, behavior: 'instant' })
+    }
+  }, [])
 
   // Автоскролл каждые 5 секунд
   useEffect(() => {
     const interval = setInterval(() => {
-      if (scrollRef.current && !selectedArticle) {
-        const nextIndex = (currentIndex + 1) % dailyItems.length
-        setCurrentIndex(nextIndex)
+      if (scrollRef.current && !selectedArticle && !isScrolling.current) {
+        const nextIndex = currentIndex + 1
+        const cardWidth = scrollRef.current.scrollWidth / extendedItems.length
+        const scrollPosition = cardWidth * (nextIndex + 1)
 
-        const cardWidth = scrollRef.current.scrollWidth / dailyItems.length
+        isScrolling.current = true
         scrollRef.current.scrollTo({
-          left: cardWidth * nextIndex,
+          left: scrollPosition,
           behavior: 'smooth'
         })
+
+        // Обновляем индекс с учётом цикличности
+        setCurrentIndex(nextIndex >= dailyItems.length ? 0 : nextIndex)
+
+        setTimeout(() => {
+          isScrolling.current = false
+        }, 500)
       }
     }, 5000)
 
     return () => clearInterval(interval)
   }, [currentIndex, selectedArticle])
 
-  // Обновляем индекс при ручном скролле
+  // Обработка скролла для бесконечной карусели
   const handleScroll = () => {
-    if (scrollRef.current) {
-      const cardWidth = scrollRef.current.scrollWidth / dailyItems.length
-      const newIndex = Math.round(scrollRef.current.scrollLeft / cardWidth)
-      if (newIndex !== currentIndex) {
+    if (scrollRef.current && !isScrolling.current) {
+      const cardWidth = scrollRef.current.scrollWidth / extendedItems.length
+      const scrollLeft = scrollRef.current.scrollLeft
+      const rawIndex = Math.round(scrollLeft / cardWidth)
+
+      // Если доскроллили до клона в конце - прыгаем к реальному первому элементу
+      if (rawIndex >= extendedItems.length - 1) {
+        isScrolling.current = true
+        scrollRef.current.scrollTo({ left: cardWidth, behavior: 'instant' })
+        setCurrentIndex(0)
+        setTimeout(() => { isScrolling.current = false }, 50)
+        return
+      }
+
+      // Если доскроллили до клона в начале - прыгаем к реальному последнему элементу
+      if (rawIndex <= 0) {
+        isScrolling.current = true
+        scrollRef.current.scrollTo({ left: cardWidth * dailyItems.length, behavior: 'instant' })
+        setCurrentIndex(dailyItems.length - 1)
+        setTimeout(() => { isScrolling.current = false }, 50)
+        return
+      }
+
+      // Обычное обновление индекса (rawIndex - 1, т.к. первый элемент это клон)
+      const newIndex = rawIndex - 1
+      if (newIndex !== currentIndex && newIndex >= 0 && newIndex < dailyItems.length) {
         setCurrentIndex(newIndex)
       }
     }
@@ -210,9 +256,9 @@ export default function DailyCard() {
           className="flex gap-4 overflow-x-auto pb-3 snap-x snap-mandatory scrollbar-hide"
           style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
         >
-          {dailyItems.map((item) => (
+          {extendedItems.map((item, index) => (
             <motion.div
-              key={item.id}
+              key={`${item.id}-${index}`}
               whileTap={{ scale: 0.98 }}
               onClick={() => setSelectedArticle(item)}
               className="card cursor-pointer flex-shrink-0 w-[85vw] max-w-[320px] snap-center"

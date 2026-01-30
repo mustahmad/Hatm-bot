@@ -44,10 +44,8 @@ export default function Profile() {
           animate={{ opacity: 1, y: 0 }}
           className="card mb-4 text-center"
         >
-          <div className="w-20 h-20 rounded-full bg-gradient-to-br from-green-400 to-emerald-600 flex items-center justify-center mx-auto mb-4 shadow-lg">
-            <span className="text-3xl text-white font-bold">
-              {(user?.first_name || '?').charAt(0).toUpperCase()}
-            </span>
+          <div className="w-20 h-20 rounded-full overflow-hidden mx-auto mb-4 shadow-lg">
+            <img src="/logo.png" alt="Logo" className="w-full h-full object-cover" />
           </div>
           <h2 className="text-xl font-bold text-gray-800">
             {user?.first_name || 'Пользователь'}
