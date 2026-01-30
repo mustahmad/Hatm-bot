@@ -8,9 +8,10 @@ import LoadingSpinner from '../components/LoadingSpinner'
 
 export default function Profile() {
   const navigate = useNavigate()
-  const { user, initData } = useTelegram()
+  const { user, initData, webApp } = useTelegram()
   const [stats, setStats] = useState<UserJuzStats | null>(null)
   const [loading, setLoading] = useState(true)
+  const [completing, setCompleting] = useState<number | null>(null)
 
   useEffect(() => {
     loadStats()
@@ -27,6 +28,22 @@ export default function Profile() {
       console.error(err)
     } finally {
       setLoading(false)
+    }
+  }
+
+  const completeJuz = async (juzId: number) => {
+    if (!initData || completing) return
+
+    try {
+      setCompleting(juzId)
+      await api.completeJuz(juzId, initData)
+      await loadStats()
+      webApp?.HapticFeedback.notificationOccurred('success')
+    } catch (err) {
+      console.error(err)
+      webApp?.HapticFeedback.notificationOccurred('error')
+    } finally {
+      setCompleting(null)
     }
   }
 
@@ -150,35 +167,43 @@ export default function Profile() {
                         </span>
                       </div>
                       {/* Джузы этого хатма */}
-                      {group.juzs.map((juz) => (
-                        <div
-                          key={juz.id}
-                          className={`card flex items-center justify-between ${
-                            juz.status === 'completed' ? 'bg-emerald-50' :
-                            juz.status === 'debt' ? 'bg-orange-50' : 'bg-white'
-                          }`}
-                        >
-                          <div className="flex items-center gap-3">
-                            <div className={`
-                              w-10 h-10 rounded-full flex items-center justify-center text-white font-bold
-                              ${juz.status === 'completed' ? 'bg-emerald-500' :
-                                juz.status === 'debt' ? 'bg-orange-500' : 'bg-gray-400'}
-                            `}>
-                              {juz.juz_number}
+                      {group.juzs.map((juz) => {
+                        const canComplete = juz.status !== 'completed'
+                        return (
+                          <div
+                            key={juz.id}
+                            className={`card flex items-center justify-between ${
+                              juz.status === 'completed' ? 'bg-emerald-50' :
+                              juz.status === 'debt' ? 'bg-orange-50' : 'bg-white'
+                            }`}
+                          >
+                            <div className="flex items-center gap-3">
+                              <div className={`
+                                w-10 h-10 rounded-full flex items-center justify-center text-white font-bold
+                                ${juz.status === 'completed' ? 'bg-emerald-500' :
+                                  juz.status === 'debt' ? 'bg-orange-500' : 'bg-gray-400'}
+                              `}>
+                                {juz.juz_number}
+                              </div>
+                              <span className="font-medium text-gray-800">Джуз {juz.juz_number}</span>
                             </div>
-                            <span className="font-medium text-gray-800">Джуз {juz.juz_number}</span>
+                            {canComplete ? (
+                              <motion.button
+                                whileTap={{ scale: 0.95 }}
+                                onClick={() => completeJuz(juz.id)}
+                                disabled={completing === juz.id}
+                                className="btn-primary text-xs py-1.5 px-3 disabled:opacity-50"
+                              >
+                                {completing === juz.id ? '...' : 'Прочитал'}
+                              </motion.button>
+                            ) : (
+                              <span className="text-xs px-3 py-1 rounded-full font-medium bg-emerald-100 text-emerald-700">
+                                Прочитан
+                              </span>
+                            )}
                           </div>
-                          <span className={`
-                            text-xs px-3 py-1 rounded-full font-medium
-                            ${juz.status === 'completed' ? 'bg-emerald-100 text-emerald-700' : ''}
-                            ${juz.status === 'debt' ? 'bg-orange-100 text-orange-700' : ''}
-                            ${juz.status === 'pending' ? 'bg-gray-100 text-gray-600' : ''}
-                          `}>
-                            {juz.status === 'completed' ? 'Прочитан' :
-                             juz.status === 'debt' ? 'Долг' : 'Ожидает'}
-                          </span>
-                        </div>
-                      ))}
+                        )
+                      })}
                     </div>
                   ))}
                 </div>
