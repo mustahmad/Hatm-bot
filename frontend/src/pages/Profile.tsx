@@ -42,7 +42,7 @@ export default function Profile() {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="card mb-6 text-center"
+          className="card mb-4 text-center shadow-md"
         >
           <div className="w-20 h-20 rounded-full bg-gradient-to-br from-green-400 to-emerald-600 flex items-center justify-center mx-auto mb-4 shadow-lg">
             <span className="text-3xl text-white font-bold">
@@ -57,11 +57,6 @@ export default function Profile() {
           )}
         </motion.div>
 
-        {/* Islamic decoration */}
-        <div className="flex justify-center mb-6">
-          <span className="text-4xl opacity-30">&#9788;</span>
-        </div>
-
         {loading ? (
           <LoadingSpinner text="Загрузка статистики..." />
         ) : stats ? (
@@ -71,26 +66,26 @@ export default function Profile() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
-              className="grid grid-cols-2 gap-3 mb-6"
+              className="grid grid-cols-2 gap-2 mb-4"
             >
-              <div className="card text-center">
-                <div className="text-3xl mb-1">📖</div>
-                <div className="text-2xl font-bold text-green-600">{stats.completed}</div>
+              <div className="card text-center shadow-sm py-3">
+                <div className="text-2xl mb-1">📖</div>
+                <div className="text-xl font-bold text-emerald-600">{stats.completed}</div>
                 <div className="text-xs text-gray-500">Прочитано джузов</div>
               </div>
-              <div className="card text-center">
-                <div className="text-3xl mb-1">⏳</div>
-                <div className="text-2xl font-bold text-gray-600">{stats.pending}</div>
+              <div className="card text-center shadow-sm py-3">
+                <div className="text-2xl mb-1">⏳</div>
+                <div className="text-xl font-bold text-gray-600">{stats.pending}</div>
                 <div className="text-xs text-gray-500">Ожидают прочтения</div>
               </div>
-              <div className="card text-center">
-                <div className="text-3xl mb-1">📚</div>
-                <div className="text-2xl font-bold text-blue-600">{stats.total_assigned}</div>
+              <div className="card text-center shadow-sm py-3">
+                <div className="text-2xl mb-1">📚</div>
+                <div className="text-xl font-bold text-blue-600">{stats.total_assigned}</div>
                 <div className="text-xs text-gray-500">Всего назначено</div>
               </div>
-              <div className="card text-center">
-                <div className="text-3xl mb-1">⚠️</div>
-                <div className="text-2xl font-bold text-orange-600">{stats.debts}</div>
+              <div className="card text-center shadow-sm py-3">
+                <div className="text-2xl mb-1">⚠️</div>
+                <div className="text-xl font-bold text-orange-600">{stats.debts}</div>
                 <div className="text-xs text-gray-500">Долгов</div>
               </div>
             </motion.div>
@@ -101,11 +96,11 @@ export default function Profile() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.2 }}
-                className="card mb-6"
+                className="card mb-4 shadow-sm"
               >
                 <div className="flex justify-between items-center mb-2">
                   <span className="text-sm text-gray-600">Общий прогресс</span>
-                  <span className="text-sm font-bold text-green-600">
+                  <span className="text-sm font-bold text-emerald-600">
                     {Math.round((stats.completed / stats.total_assigned) * 100)}%
                   </span>
                 </div>
@@ -127,8 +122,8 @@ export default function Profile() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.3 }}
               >
-                <h3 className="text-lg font-semibold mb-4 text-green-700">Мои джузы</h3>
-                <div className="space-y-4">
+                <h3 className="text-lg font-semibold mb-3 text-emerald-700">Мои джузы</h3>
+                <div className="space-y-3">
                   {/* Группируем джузы по группе и хатму */}
                   {Object.entries(
                     stats.juzs.reduce((acc, juz) => {
@@ -160,24 +155,24 @@ export default function Profile() {
                       {group.juzs.map((juz) => (
                         <div
                           key={juz.id}
-                          className={`card flex items-center justify-between ${
-                            juz.status === 'completed' ? 'bg-green-50' :
-                            juz.status === 'debt' ? 'bg-orange-50' : ''
+                          className={`card flex items-center justify-between shadow-sm ${
+                            juz.status === 'completed' ? 'bg-emerald-50' :
+                            juz.status === 'debt' ? 'bg-orange-50' : 'bg-white'
                           }`}
                         >
                           <div className="flex items-center gap-3">
                             <div className={`
                               w-10 h-10 rounded-full flex items-center justify-center text-white font-bold
-                              ${juz.status === 'completed' ? 'bg-green-500' :
+                              ${juz.status === 'completed' ? 'bg-emerald-500' :
                                 juz.status === 'debt' ? 'bg-orange-500' : 'bg-gray-400'}
                             `}>
                               {juz.juz_number}
                             </div>
-                            <span className="font-medium">Джуз {juz.juz_number}</span>
+                            <span className="font-medium text-gray-800">Джуз {juz.juz_number}</span>
                           </div>
                           <span className={`
                             text-xs px-3 py-1 rounded-full font-medium
-                            ${juz.status === 'completed' ? 'bg-green-100 text-green-700' : ''}
+                            ${juz.status === 'completed' ? 'bg-emerald-100 text-emerald-700' : ''}
                             ${juz.status === 'debt' ? 'bg-orange-100 text-orange-700' : ''}
                             ${juz.status === 'pending' ? 'bg-gray-100 text-gray-600' : ''}
                           `}>
