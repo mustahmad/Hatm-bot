@@ -2,7 +2,7 @@ import { useEffect, useState, useCallback } from 'react'
 import { useParams } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { useTelegram } from '../hooks/useTelegram'
-import { api, HatmProgress, JuzAssignment, HatmResponse } from '../api/client'
+import { api, HatmProgress, JuzAssignment, HatmResponse, User } from '../api/client'
 import Header from '../components/Header'
 import CircularTracker from '../components/CircularTracker'
 import JuzList from '../components/JuzList'
@@ -10,7 +10,8 @@ import LoadingSpinner from '../components/LoadingSpinner'
 
 export default function Hatm() {
   const { id } = useParams<{ id: string }>()
-  const { initData, user, webApp } = useTelegram()
+  const { initData, webApp } = useTelegram()
+  const [currentUser, setCurrentUser] = useState<User | null>(null)
   const [hatm, setHatm] = useState<HatmResponse | null>(null)
   const [progress, setProgress] = useState<HatmProgress | null>(null)
   const [loading, setLoading] = useState(true)
@@ -23,6 +24,11 @@ export default function Hatm() {
 
     try {
       setLoading(true)
+
+      // Получаем внутренний ID пользователя из базы
+      const userData = await api.getMe(initData)
+      setCurrentUser(userData)
+
       const hatmData = await api.getHatm(parseInt(id), initData)
       setHatm(hatmData)
 
@@ -216,7 +222,7 @@ export default function Hatm() {
               <h3 className="text-lg font-semibold mb-4 text-green-700">Список джузов</h3>
               <JuzList
                 juzAssignments={progress.juz_assignments}
-                currentUserId={user?.id}
+                currentUserId={currentUser?.id}
                 onComplete={completeJuz}
                 isLoading={completing !== null}
               />

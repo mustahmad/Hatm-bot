@@ -40,9 +40,9 @@ export default function Home() {
         rightAction={
           <button
             onClick={() => navigate('/profile')}
-            className="w-10 h-10 rounded-full bg-white/80 flex items-center justify-center shadow-sm border border-gray-100"
+            className="w-10 h-10 rounded-full bg-white/80 flex items-center justify-center shadow-sm border border-emerald-100/50 hover:bg-emerald-50 transition-colors"
           >
-            <svg className="w-5 h-5 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg className="w-5 h-5 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
             </svg>
           </button>
@@ -57,11 +57,11 @@ export default function Home() {
           animate={{ opacity: 1 }}
           className="flex justify-center items-center gap-4 mb-6"
         >
-          <span className="text-2xl opacity-30">☪</span>
-          <div className="h-px flex-1 bg-gradient-to-r from-transparent via-green-300 to-transparent" />
-          <span className="text-xl opacity-40">🕌</span>
-          <div className="h-px flex-1 bg-gradient-to-r from-transparent via-green-300 to-transparent" />
-          <span className="text-2xl opacity-30">☪</span>
+          <span className="text-2xl opacity-40 text-emerald-600">☪</span>
+          <div className="h-px flex-1 bg-gradient-to-r from-transparent via-emerald-300/60 to-transparent" />
+          <span className="text-xl opacity-50 text-emerald-600">🕌</span>
+          <div className="h-px flex-1 bg-gradient-to-r from-transparent via-emerald-300/60 to-transparent" />
+          <span className="text-2xl opacity-40 text-emerald-600">☪</span>
         </motion.div>
 
         {/* Action buttons */}

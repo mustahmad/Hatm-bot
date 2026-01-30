@@ -9,6 +9,7 @@ import JoinGroup from './pages/JoinGroup'
 import CreateHatm from './pages/CreateHatm'
 import Profile from './pages/Profile'
 import BottomNav from './components/BottomNav'
+import FloatingIcons from './components/FloatingIcons'
 
 function AppContent() {
   const { webApp, ready } = useTelegram()
@@ -31,18 +32,21 @@ function AppContent() {
   }
 
   return (
-    <div className="min-h-screen bg-telegram-bg pb-20">
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/group/:id" element={<Group />} />
-        <Route path="/hatm/:id" element={<Hatm />} />
-        <Route path="/create-group" element={<CreateGroup />} />
-        <Route path="/join-group" element={<JoinGroup />} />
-        <Route path="/group/:groupId/create-hatm" element={<CreateHatm />} />
-        <Route path="/profile" element={<Profile />} />
-      </Routes>
-      <BottomNav />
-    </div>
+    <>
+      <FloatingIcons />
+      <div className="min-h-screen bg-telegram-bg pb-20">
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/group/:id" element={<Group />} />
+          <Route path="/hatm/:id" element={<Hatm />} />
+          <Route path="/create-group" element={<CreateGroup />} />
+          <Route path="/join-group" element={<JoinGroup />} />
+          <Route path="/group/:groupId/create-hatm" element={<CreateHatm />} />
+          <Route path="/profile" element={<Profile />} />
+        </Routes>
+        <BottomNav />
+      </div>
+    </>
   )
 }
 

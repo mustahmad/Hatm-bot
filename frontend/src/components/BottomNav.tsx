@@ -35,17 +35,18 @@ export default function BottomNav() {
     <motion.div
       initial={{ y: 100 }}
       animate={{ y: 0 }}
-      className="fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-lg border-t border-gray-100 px-6 py-2 pb-safe z-50"
+      className="fixed bottom-0 left-0 right-0 bg-white/80 backdrop-blur-xl border-t border-emerald-100/50 px-6 py-2 pb-safe z-50"
+      style={{ boxShadow: '0 -4px 20px rgba(16, 185, 129, 0.05)' }}
     >
       <div className="flex justify-around items-center max-w-md mx-auto">
         {navItems.map((item) => (
           <button
             key={item.path}
             onClick={() => navigate(item.path)}
-            className={`flex flex-col items-center py-2 px-4 rounded-xl transition-colors ${
+            className={`flex flex-col items-center py-2 px-4 rounded-xl transition-all duration-200 ${
               isActive(item.path)
-                ? 'text-green-600'
-                : 'text-gray-400 hover:text-gray-600'
+                ? 'text-emerald-600'
+                : 'text-gray-400 hover:text-emerald-500'
             }`}
           >
             {item.icon}
@@ -53,7 +54,7 @@ export default function BottomNav() {
             {isActive(item.path) && (
               <motion.div
                 layoutId="activeTab"
-                className="absolute bottom-1 w-1 h-1 bg-green-600 rounded-full"
+                className="absolute -bottom-0.5 w-6 h-1 bg-gradient-to-r from-emerald-400 via-emerald-500 to-emerald-400 rounded-full"
               />
             )}
           </button>
