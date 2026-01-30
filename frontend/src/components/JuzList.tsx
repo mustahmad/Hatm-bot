@@ -53,12 +53,12 @@ export default function JuzList({
               `}
               onClick={() => canComplete && onComplete?.(juz)}
             >
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-shrink">
                 {/* Status indicator */}
                 <motion.div
                   className={`
-                    w-10 h-10 rounded-full flex items-center justify-center
-                    text-white font-bold text-sm
+                    w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center flex-shrink-0
+                    text-white font-bold text-xs sm:text-sm
                     ${getStatusColor(juz.status, juz.is_debt)}
                   `}
                   animate={juz.status === 'completed' ? { scale: [1, 1.1, 1] } : {}}
@@ -68,11 +68,11 @@ export default function JuzList({
                 </motion.div>
 
                 {/* Juz info */}
-                <div>
-                  <div className="font-semibold text-gray-800">
+                <div className="min-w-0">
+                  <div className="font-semibold text-gray-800 text-sm sm:text-base">
                     Джуз {juz.juz_number}
                   </div>
-                  <div className="text-sm text-gray-500">
+                  <div className="text-xs sm:text-sm text-gray-500 truncate">
                     {juz.first_name || juz.username || 'Участник'}
                     {isMyJuz && <span className="text-green-600 ml-1">(вы)</span>}
                   </div>
@@ -80,21 +80,23 @@ export default function JuzList({
               </div>
 
               {/* Status badge */}
-              <div className="flex items-center gap-2">
-                <span className={`
-                  text-xs px-3 py-1 rounded-full font-medium
-                  ${juz.status === 'completed' ? 'bg-green-100 text-green-700' : ''}
-                  ${juz.status === 'debt' || juz.is_debt ? 'bg-orange-100 text-orange-700' : ''}
-                  ${juz.status === 'pending' && !juz.is_debt ? 'bg-gray-100 text-gray-600' : ''}
-                `}>
-                  {getStatusText(juz.status, juz.is_debt)}
-                </span>
+              <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
+                {!canComplete && (
+                  <span className={`
+                    text-xs px-2 sm:px-3 py-1 rounded-full font-medium whitespace-nowrap
+                    ${juz.status === 'completed' ? 'bg-green-100 text-green-700' : ''}
+                    ${juz.status === 'debt' || juz.is_debt ? 'bg-orange-100 text-orange-700' : ''}
+                    ${juz.status === 'pending' && !juz.is_debt ? 'bg-gray-100 text-gray-600' : ''}
+                  `}>
+                    {getStatusText(juz.status, juz.is_debt)}
+                  </span>
+                )}
 
                 {canComplete && (
                   <motion.button
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
-                    className="btn-primary text-sm py-2 px-4"
+                    className="btn-primary text-xs sm:text-sm py-1.5 sm:py-2 px-3 sm:px-4 whitespace-nowrap"
                     disabled={isLoading}
                     onClick={(e) => {
                       e.stopPropagation()
