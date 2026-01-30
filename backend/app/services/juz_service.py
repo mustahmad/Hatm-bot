@@ -1,4 +1,4 @@
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 from sqlalchemy import func
 from typing import List, Optional, Dict, Tuple
 from datetime import datetime
@@ -64,19 +64,29 @@ class JuzService:
         if not hatm_ids:
             return cache
 
-        # Получаем все хатмы и их группы
-        hatms = self.db.query(Hatm).filter(Hatm.id.in_(hatm_ids)).all()
+        # Получаем все хатмы с их группами в одном запросе (eager loading)
+        hatms = (
+            self.db.query(Hatm)
+            .options(joinedload(Hatm.group))
+            .filter(Hatm.id.in_(hatm_ids))
+            .all()
+        )
 
+        # Группируем хатмы по group_id для подсчета номера
+        group_hatm_counts = {}
         for hatm in hatms:
-            group = self.db.query(Group).filter(Group.id == hatm.group_id).first()
-            if group:
-                # Вычисляем номер хатма в группе (по порядку создания)
-                hatm_number = (
-                    self.db.query(Hatm)
-                    .filter(Hatm.group_id == group.id, Hatm.id <= hatm.id)
-                    .count()
-                )
-                cache[hatm.id] = (group.name, hatm_number, group.id)
+            if hatm.group:
+                if hatm.group_id not in group_hatm_counts:
+                    # Один запрос для подсчета всех хатмов группы
+                    count = self.db.query(func.count(Hatm.id)).filter(
+                        Hatm.group_id == hatm.group_id,
+                        Hatm.id <= hatm.id
+                    ).scalar()
+                    group_hatm_counts[(hatm.group_id, hatm.id)] = count
+                else:
+                    count = group_hatm_counts.get((hatm.group_id, hatm.id), 1)
+
+                cache[hatm.id] = (hatm.group.name, count, hatm.group_id)
 
         return cache
 

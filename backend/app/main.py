@@ -6,6 +6,7 @@ from dotenv import load_dotenv
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.middleware.gzip import GZipMiddleware
 from aiogram import Bot, Dispatcher
 from aiogram.enums import ParseMode
 from aiogram.client.default import DefaultBotProperties
@@ -108,6 +109,9 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# GZip сжатие для уменьшения размера ответов
+app.add_middleware(GZipMiddleware, minimum_size=500)
 
 # Подключение роутов API
 app.include_router(api_router, prefix="/api")

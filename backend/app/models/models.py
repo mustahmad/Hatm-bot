@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, BigInteger, String, DateTime, ForeignKey, Enum, Boolean
+from sqlalchemy import Column, Integer, BigInteger, String, DateTime, ForeignKey, Enum, Boolean, Index
 from sqlalchemy.orm import relationship
 from datetime import datetime
 import enum
@@ -50,10 +50,13 @@ class Group(Base):
 
 class GroupMember(Base):
     __tablename__ = "group_members"
+    __table_args__ = (
+        Index('idx_group_member_group_user', 'group_id', 'user_id'),
+    )
 
     id = Column(Integer, primary_key=True, index=True)
-    group_id = Column(Integer, ForeignKey("groups.id"), nullable=False)
-    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    group_id = Column(Integer, ForeignKey("groups.id"), nullable=False, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False, index=True)
     joined_at = Column(DateTime, default=datetime.utcnow)
 
     # Relationships
@@ -63,12 +66,15 @@ class GroupMember(Base):
 
 class Hatm(Base):
     __tablename__ = "hatms"
+    __table_args__ = (
+        Index('idx_hatm_group_status', 'group_id', 'status'),
+    )
 
     id = Column(Integer, primary_key=True, index=True)
-    group_id = Column(Integer, ForeignKey("groups.id"), nullable=False)
+    group_id = Column(Integer, ForeignKey("groups.id"), nullable=False, index=True)
     duration_days = Column(Integer, nullable=False)
     participants_count = Column(Integer, nullable=False)
-    status = Column(Enum(HatmStatus), default=HatmStatus.PENDING)
+    status = Column(Enum(HatmStatus), default=HatmStatus.PENDING, index=True)
     started_at = Column(DateTime, nullable=True)
     ends_at = Column(DateTime, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
@@ -80,14 +86,18 @@ class Hatm(Base):
 
 class JuzAssignment(Base):
     __tablename__ = "juz_assignments"
+    __table_args__ = (
+        Index('idx_juz_hatm_user', 'hatm_id', 'user_id'),
+        Index('idx_juz_user_status', 'user_id', 'status'),
+    )
 
     id = Column(Integer, primary_key=True, index=True)
-    hatm_id = Column(Integer, ForeignKey("hatms.id"), nullable=False)
-    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    hatm_id = Column(Integer, ForeignKey("hatms.id"), nullable=False, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False, index=True)
     juz_number = Column(Integer, nullable=False)  # 1-30
-    status = Column(Enum(JuzStatus), default=JuzStatus.PENDING)
+    status = Column(Enum(JuzStatus), default=JuzStatus.PENDING, index=True)
     completed_at = Column(DateTime, nullable=True)
-    is_debt = Column(Boolean, default=False)
+    is_debt = Column(Boolean, default=False, index=True)
 
     # Relationships
     hatm = relationship("Hatm", back_populates="juz_assignments")
