@@ -138,8 +138,8 @@ export default function Hatm() {
             className="text-center py-8"
           >
             <div className="text-6xl mb-4">📖</div>
-            <h2 className="text-xl font-bold mb-2">Хатм готов к запуску</h2>
-            <p className="text-gray-500 mb-6">
+            <h2 className="text-xl font-bold mb-2 text-gray-800">Хатм готов к запуску</h2>
+            <p className="text-gray-600 mb-6">
               Длительность: {hatm.duration_days} дн.<br />
               Участников: {hatm.participants_count}
             </p>

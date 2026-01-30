@@ -196,7 +196,7 @@ export default function Group() {
           transition={{ delay: 0.2 }}
           className="mt-8"
         >
-          <h3 className="text-lg font-semibold mb-4">Участники</h3>
+          <h3 className="text-lg font-semibold mb-4 text-gray-800">Участники</h3>
           <div className="space-y-2">
             {group.members.map((member) => (
               <div key={member.id} className="card flex items-center gap-3">
