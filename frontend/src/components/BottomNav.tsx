@@ -30,7 +30,7 @@ export default function BottomNav() {
               animate={{ y: 0 }}
               exit={{ y: '100%' }}
               transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-              className="fixed bottom-0 left-0 right-0 z-50 bg-white rounded-t-3xl shadow-2xl"
+              className="fixed bottom-0 left-0 right-0 z-50 glass-header rounded-t-3xl"
             >
               {/* Handle */}
               <div className="flex justify-center pt-3 pb-2">
@@ -84,7 +84,7 @@ export default function BottomNav() {
       <motion.div
         initial={{ y: 100 }}
         animate={{ y: 0 }}
-        className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 px-6 py-2 pb-safe z-30 shadow-[0_-4px_20px_rgba(0,0,0,0.08)]"
+        className="fixed bottom-0 left-0 right-0 glass-nav px-6 py-2 pb-safe z-30"
       >
         <div className="flex justify-between items-center max-w-md mx-auto">
           {/* Create button */}
@@ -94,11 +94,11 @@ export default function BottomNav() {
           >
             <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-200 ${
               showMenu
-                ? 'bg-emerald-500 shadow-md shadow-emerald-200'
-                : 'bg-emerald-50'
+                ? 'glass-active'
+                : 'glass-button'
             }`}>
               <svg
-                className={`w-5 h-5 transition-colors ${showMenu ? 'text-white' : 'text-emerald-600'}`}
+                className={`w-5 h-5 transition-colors ${showMenu ? 'text-white' : 'text-emerald-500'}`}
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -122,8 +122,8 @@ export default function BottomNav() {
           >
             <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-200 ${
               isActive('/') && !showMenu
-                ? 'bg-emerald-500 shadow-md shadow-emerald-200'
-                : 'bg-gray-50'
+                ? 'glass-active'
+                : 'glass-button'
             }`}>
               {isActive('/') && !showMenu ? (
                 <svg className="w-5 h-5 text-white" viewBox="0 0 24 24" fill="currentColor">
@@ -151,8 +151,8 @@ export default function BottomNav() {
           >
             <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-200 ${
               isActive('/profile')
-                ? 'bg-emerald-500 shadow-md shadow-emerald-200'
-                : 'bg-gray-50'
+                ? 'glass-active'
+                : 'glass-button'
             }`}>
               {isActive('/profile') ? (
                 <svg className="w-5 h-5 text-white" viewBox="0 0 24 24" fill="currentColor">

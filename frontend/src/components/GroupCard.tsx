@@ -17,7 +17,7 @@ export default function GroupCard({ group, index = 0 }: GroupCardProps) {
       transition={{ duration: 0.3, delay: index * 0.05 }}
       whileTap={{ scale: 0.98 }}
       onClick={() => navigate(`/group/${group.id}`)}
-      className="card cursor-pointer shadow-md hover:shadow-lg transition-shadow"
+      className="card cursor-pointer"
     >
       <div className="flex items-center justify-between">
         {/* Group info */}

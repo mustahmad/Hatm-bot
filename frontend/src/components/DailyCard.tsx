@@ -215,7 +215,7 @@ export default function DailyCard() {
               key={item.id}
               whileTap={{ scale: 0.98 }}
               onClick={() => setSelectedArticle(item)}
-              className="card cursor-pointer flex-shrink-0 w-[85vw] max-w-[320px] snap-center shadow-md"
+              className="card cursor-pointer flex-shrink-0 w-[85vw] max-w-[320px] snap-center"
             >
               {/* Header with emoji, title and tag */}
               <div className="flex items-start justify-between mb-2">

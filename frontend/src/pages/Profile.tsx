@@ -42,7 +42,7 @@ export default function Profile() {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="card mb-4 text-center shadow-md"
+          className="card mb-4 text-center"
         >
           <div className="w-20 h-20 rounded-full bg-gradient-to-br from-green-400 to-emerald-600 flex items-center justify-center mx-auto mb-4 shadow-lg">
             <span className="text-3xl text-white font-bold">
@@ -68,22 +68,22 @@ export default function Profile() {
               transition={{ delay: 0.1 }}
               className="grid grid-cols-2 gap-2 mb-4"
             >
-              <div className="card text-center shadow-sm py-3">
+              <div className="card text-center py-3">
                 <div className="text-2xl mb-1">📖</div>
                 <div className="text-xl font-bold text-emerald-600">{stats.completed}</div>
                 <div className="text-xs text-gray-500">Прочитано джузов</div>
               </div>
-              <div className="card text-center shadow-sm py-3">
+              <div className="card text-center py-3">
                 <div className="text-2xl mb-1">⏳</div>
                 <div className="text-xl font-bold text-gray-600">{stats.pending}</div>
                 <div className="text-xs text-gray-500">Ожидают прочтения</div>
               </div>
-              <div className="card text-center shadow-sm py-3">
+              <div className="card text-center py-3">
                 <div className="text-2xl mb-1">📚</div>
                 <div className="text-xl font-bold text-blue-600">{stats.total_assigned}</div>
                 <div className="text-xs text-gray-500">Всего назначено</div>
               </div>
-              <div className="card text-center shadow-sm py-3">
+              <div className="card text-center py-3">
                 <div className="text-2xl mb-1">⚠️</div>
                 <div className="text-xl font-bold text-orange-600">{stats.debts}</div>
                 <div className="text-xs text-gray-500">Долгов</div>
@@ -96,7 +96,7 @@ export default function Profile() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.2 }}
-                className="card mb-4 shadow-sm"
+                className="card mb-4"
               >
                 <div className="flex justify-between items-center mb-2">
                   <span className="text-sm text-gray-600">Общий прогресс</span>
@@ -155,7 +155,7 @@ export default function Profile() {
                       {group.juzs.map((juz) => (
                         <div
                           key={juz.id}
-                          className={`card flex items-center justify-between shadow-sm ${
+                          className={`card flex items-center justify-between ${
                             juz.status === 'completed' ? 'bg-emerald-50' :
                             juz.status === 'debt' ? 'bg-orange-50' : 'bg-white'
                           }`}
