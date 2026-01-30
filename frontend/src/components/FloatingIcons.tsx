@@ -1,42 +1,26 @@
 import { motion } from 'framer-motion'
 
-// Исламские иконки - распределены по всему экрану
+// Исламские иконки - начинаются ниже хедера (с 25%)
 const icons = [
-  // Верхний ряд
-  { style: { top: '3%', left: '8%', width: 28, height: 28 }, type: 'crescent' },
-  { style: { top: '6%', left: '45%', width: 22, height: 22 }, type: 'star' },
-  { style: { top: '4%', right: '12%', width: 32, height: 32 }, type: 'lantern' },
-
-  // Верхняя середина
-  { style: { top: '15%', left: '18%', width: 26, height: 26 }, type: 'mosque' },
-  { style: { top: '12%', left: '65%', width: 20, height: 20 }, type: 'crescent' },
-  { style: { top: '18%', right: '8%', width: 24, height: 24 }, type: 'star' },
+  // Верхний ряд (после хедера)
+  { style: { top: '26%', left: '5%', width: 22, height: 22 }, type: 'crescent' },
+  { style: { top: '28%', right: '8%', width: 20, height: 20 }, type: 'star' },
 
   // Центр-верх
-  { style: { top: '28%', left: '5%', width: 24, height: 24 }, type: 'quran' },
-  { style: { top: '25%', left: '38%', width: 30, height: 30 }, type: 'lantern' },
-  { style: { top: '30%', right: '15%', width: 22, height: 22 }, type: 'beads' },
+  { style: { top: '38%', left: '8%', width: 24, height: 24 }, type: 'lantern' },
+  { style: { top: '35%', right: '12%', width: 22, height: 22 }, type: 'mosque' },
 
   // Центр
-  { style: { top: '42%', left: '12%', width: 26, height: 26 }, type: 'star' },
-  { style: { top: '38%', left: '52%', width: 20, height: 20 }, type: 'crescent' },
-  { style: { top: '45%', right: '6%', width: 28, height: 28 }, type: 'mosque' },
+  { style: { top: '48%', left: '6%', width: 20, height: 20 }, type: 'star' },
+  { style: { top: '50%', right: '6%', width: 24, height: 24 }, type: 'quran' },
 
   // Центр-низ
-  { style: { top: '55%', left: '6%', width: 22, height: 22 }, type: 'lantern' },
-  { style: { top: '52%', left: '42%', width: 24, height: 24 }, type: 'quran' },
-  { style: { top: '58%', right: '18%', width: 20, height: 20 }, type: 'star' },
+  { style: { top: '60%', left: '10%', width: 22, height: 22 }, type: 'beads' },
+  { style: { top: '58%', right: '10%', width: 20, height: 20 }, type: 'crescent' },
 
-  // Нижняя середина
-  { style: { top: '68%', left: '15%', width: 28, height: 28 }, type: 'crescent' },
-  { style: { top: '65%', left: '55%', width: 26, height: 26 }, type: 'beads' },
-  { style: { top: '70%', right: '8%', width: 24, height: 24 }, type: 'lantern' },
-
-  // Нижний ряд
-  { style: { top: '82%', left: '8%', width: 22, height: 22 }, type: 'star' },
-  { style: { top: '78%', left: '35%', width: 28, height: 28 }, type: 'mosque' },
-  { style: { top: '85%', right: '25%', width: 20, height: 20 }, type: 'crescent' },
-  { style: { top: '80%', right: '5%', width: 26, height: 26 }, type: 'quran' },
+  // Нижняя часть
+  { style: { top: '70%', left: '5%', width: 24, height: 24 }, type: 'mosque' },
+  { style: { top: '72%', right: '8%', width: 22, height: 22 }, type: 'lantern' },
 ]
 
 const iconSvgs: Record<string, JSX.Element> = {

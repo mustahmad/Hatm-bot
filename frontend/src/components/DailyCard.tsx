@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 
 interface DailyItem {
@@ -166,7 +166,37 @@ const dailyItems: DailyItem[] = [
 
 export default function DailyCard() {
   const [selectedArticle, setSelectedArticle] = useState<DailyItem | null>(null)
+  const [currentIndex, setCurrentIndex] = useState(0)
   const scrollRef = useRef<HTMLDivElement>(null)
+
+  // Автоскролл каждые 5 секунд
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (scrollRef.current && !selectedArticle) {
+        const nextIndex = (currentIndex + 1) % dailyItems.length
+        setCurrentIndex(nextIndex)
+
+        const cardWidth = scrollRef.current.scrollWidth / dailyItems.length
+        scrollRef.current.scrollTo({
+          left: cardWidth * nextIndex,
+          behavior: 'smooth'
+        })
+      }
+    }, 5000)
+
+    return () => clearInterval(interval)
+  }, [currentIndex, selectedArticle])
+
+  // Обновляем индекс при ручном скролле
+  const handleScroll = () => {
+    if (scrollRef.current) {
+      const cardWidth = scrollRef.current.scrollWidth / dailyItems.length
+      const newIndex = Math.round(scrollRef.current.scrollLeft / cardWidth)
+      if (newIndex !== currentIndex) {
+        setCurrentIndex(newIndex)
+      }
+    }
+  }
 
   return (
     <>
@@ -176,6 +206,7 @@ export default function DailyCard() {
         {/* Scrollable carousel */}
         <div
           ref={scrollRef}
+          onScroll={handleScroll}
           className="flex gap-4 overflow-x-auto pb-3 snap-x snap-mandatory scrollbar-hide"
           style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
         >
@@ -184,7 +215,7 @@ export default function DailyCard() {
               key={item.id}
               whileTap={{ scale: 0.98 }}
               onClick={() => setSelectedArticle(item)}
-              className="card cursor-pointer flex-shrink-0 w-[85vw] max-w-[320px] snap-center"
+              className="card cursor-pointer flex-shrink-0 w-[85vw] max-w-[320px] snap-center shadow-md"
             >
               {/* Header with emoji, title and tag */}
               <div className="flex items-start justify-between mb-2">
@@ -218,7 +249,9 @@ export default function DailyCard() {
           {dailyItems.map((_, index) => (
             <div
               key={index}
-              className="w-1.5 h-1.5 rounded-full bg-emerald-200"
+              className={`w-1.5 h-1.5 rounded-full transition-colors duration-300 ${
+                index === currentIndex ? 'bg-emerald-500' : 'bg-emerald-200'
+              }`}
             />
           ))}
         </div>

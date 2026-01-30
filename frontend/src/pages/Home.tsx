@@ -40,7 +40,7 @@ export default function Home() {
         animate={{ opacity: 1, y: 0 }}
         className="px-4 pt-6 pb-4"
       >
-        <div className="bg-white rounded-2xl p-4 shadow-sm">
+        <div className="bg-white rounded-2xl p-4 shadow-md">
           <div className="flex items-start justify-between">
             <div>
               <h1 className="text-2xl font-bold text-gray-800">

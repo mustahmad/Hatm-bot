@@ -84,7 +84,7 @@ export default function BottomNav() {
       <motion.div
         initial={{ y: 100 }}
         animate={{ y: 0 }}
-        className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 px-6 py-3 pb-safe z-30"
+        className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 px-6 py-2 pb-safe z-30 shadow-[0_-4px_20px_rgba(0,0,0,0.08)]"
       >
         <div className="flex justify-between items-center max-w-md mx-auto">
           {/* Create button */}
@@ -92,13 +92,13 @@ export default function BottomNav() {
             onClick={() => setShowMenu(!showMenu)}
             className="flex flex-col items-center flex-1"
           >
-            <div className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-all duration-200 ${
+            <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-200 ${
               showMenu
-                ? 'bg-emerald-500 shadow-lg shadow-emerald-200'
+                ? 'bg-emerald-500 shadow-md shadow-emerald-200'
                 : 'bg-emerald-50'
             }`}>
               <svg
-                className={`w-6 h-6 transition-colors ${showMenu ? 'text-white' : 'text-emerald-600'}`}
+                className={`w-5 h-5 transition-colors ${showMenu ? 'text-white' : 'text-emerald-600'}`}
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -107,7 +107,7 @@ export default function BottomNav() {
                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
               </svg>
             </div>
-            <span className={`text-xs mt-1.5 font-medium ${showMenu ? 'text-emerald-600' : 'text-gray-500'}`}>
+            <span className={`text-[10px] mt-1 font-medium ${showMenu ? 'text-emerald-600' : 'text-gray-500'}`}>
               Создать
             </span>
           </button>
@@ -120,13 +120,13 @@ export default function BottomNav() {
             }}
             className="flex flex-col items-center flex-1"
           >
-            <div className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-all duration-200 ${
+            <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-200 ${
               isActive('/') && !showMenu
-                ? 'bg-emerald-500 shadow-lg shadow-emerald-200'
+                ? 'bg-emerald-500 shadow-md shadow-emerald-200'
                 : 'bg-gray-50'
             }`}>
               <svg
-                className={`w-6 h-6 ${isActive('/') && !showMenu ? 'text-white' : 'text-gray-400'}`}
+                className={`w-5 h-5 ${isActive('/') && !showMenu ? 'text-white' : 'text-gray-400'}`}
                 viewBox="0 0 24 24"
                 fill={isActive('/') && !showMenu ? 'currentColor' : 'none'}
                 stroke="currentColor"
@@ -135,7 +135,7 @@ export default function BottomNav() {
                 <path d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
               </svg>
             </div>
-            <span className={`text-xs mt-1.5 font-medium ${isActive('/') && !showMenu ? 'text-emerald-600' : 'text-gray-500'}`}>
+            <span className={`text-[10px] mt-1 font-medium ${isActive('/') && !showMenu ? 'text-emerald-600' : 'text-gray-500'}`}>
               Главная
             </span>
           </button>
@@ -148,13 +148,13 @@ export default function BottomNav() {
             }}
             className="flex flex-col items-center flex-1"
           >
-            <div className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-all duration-200 ${
+            <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-200 ${
               isActive('/profile')
-                ? 'bg-emerald-500 shadow-lg shadow-emerald-200'
+                ? 'bg-emerald-500 shadow-md shadow-emerald-200'
                 : 'bg-gray-50'
             }`}>
               <svg
-                className={`w-6 h-6 ${isActive('/profile') ? 'text-white' : 'text-gray-400'}`}
+                className={`w-5 h-5 ${isActive('/profile') ? 'text-white' : 'text-gray-400'}`}
                 viewBox="0 0 24 24"
                 fill={isActive('/profile') ? 'currentColor' : 'none'}
                 stroke="currentColor"
@@ -163,7 +163,7 @@ export default function BottomNav() {
                 <path d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
               </svg>
             </div>
-            <span className={`text-xs mt-1.5 font-medium ${isActive('/profile') ? 'text-emerald-600' : 'text-gray-500'}`}>
+            <span className={`text-[10px] mt-1 font-medium ${isActive('/profile') ? 'text-emerald-600' : 'text-gray-500'}`}>
               Профиль
             </span>
           </button>
