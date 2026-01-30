@@ -3,7 +3,10 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 import os
 
+# Railway использует postgres://, но SQLAlchemy требует postgresql://
 DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./hatm.db")
+if DATABASE_URL.startswith("postgres://"):
+    DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
 
 engine = create_engine(
     DATABASE_URL,
