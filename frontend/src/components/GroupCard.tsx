@@ -14,47 +14,42 @@ export default function GroupCard({ group, index = 0 }: GroupCardProps) {
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3, delay: index * 0.1 }}
-      whileHover={{ scale: 1.02 }}
+      transition={{ duration: 0.3, delay: index * 0.05 }}
       whileTap={{ scale: 0.98 }}
       onClick={() => navigate(`/group/${group.id}`)}
       className="card cursor-pointer hover:shadow-md transition-shadow"
     >
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          {/* Group icon */}
-          <div className="w-12 h-12 rounded-2xl gradient-green flex items-center justify-center shadow-md relative">
-            <span className="text-white text-xl">📖</span>
-            <span className="absolute -top-1 -right-1 text-xs">☪</span>
-          </div>
-
-          {/* Group info */}
-          <div>
+        {/* Group info */}
+        <div className="flex-1">
+          <div className="flex items-center gap-3 mb-1">
             <h3 className="font-semibold text-gray-800 text-lg">
               {group.name}
             </h3>
-            <p className="text-sm text-gray-500">
-              {group.members_count} участник{getParticipantsSuffix(group.members_count)}
-            </p>
+            {group.has_active_hatm ? (
+              <span className="text-xs px-3 py-1 rounded-full bg-emerald-100 text-emerald-700 font-medium">
+                Активный
+              </span>
+            ) : (
+              <span className="text-xs px-3 py-1 rounded-full bg-gray-100 text-gray-500 font-medium">
+                Завершен
+              </span>
+            )}
           </div>
+          <p className="text-sm text-gray-500">
+            {group.members_count} участник{getParticipantsSuffix(group.members_count)}
+          </p>
         </div>
 
-        {/* Status indicator */}
-        <div className="flex items-center gap-2">
-          {group.has_active_hatm && (
-            <span className="text-xs px-3 py-1 rounded-full bg-green-100 text-green-700 font-medium">
-              Активный хатм
-            </span>
-          )}
-          <svg
-            className="w-5 h-5 text-gray-400"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-          </svg>
-        </div>
+        {/* Arrow */}
+        <svg
+          className="w-6 h-6 text-gray-300"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+        </svg>
       </div>
     </motion.div>
   )

@@ -4,8 +4,7 @@ import { motion } from 'framer-motion'
 import { useTelegram } from '../hooks/useTelegram'
 import { api, Group } from '../api/client'
 import GroupCard from '../components/GroupCard'
-import Header from '../components/Header'
-import EmptyState from '../components/EmptyState'
+import DailyCard from '../components/DailyCard'
 import LoadingSpinner from '../components/LoadingSpinner'
 
 export default function Home() {
@@ -35,69 +34,67 @@ export default function Home() {
 
   return (
     <div className="min-h-screen">
-      <Header
-        title={`Ассалам алейкум, ${user?.first_name || 'друг'}!`}
-        rightAction={
+      {/* Header */}
+      <motion.div
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="px-4 pt-6 pb-4"
+      >
+        <div className="flex items-start justify-between">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-800">
+              Ассалям алейкум,
+            </h1>
+            <h1 className="text-2xl font-bold text-gray-800 mb-1">
+              {user?.first_name || 'друг'}!
+            </h1>
+            <p className="text-emerald-600 text-sm font-medium">
+              Ваши группы для хатма
+            </p>
+          </div>
           <button
             onClick={() => navigate('/profile')}
-            className="w-10 h-10 rounded-full bg-white/80 flex items-center justify-center shadow-sm border border-emerald-100/50 hover:bg-emerald-50 transition-colors"
+            className="w-12 h-12 rounded-full bg-emerald-500 flex items-center justify-center shadow-lg"
           >
-            <svg className="w-5 h-5 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-            </svg>
+            <span className="text-white text-lg font-semibold">
+              {(user?.first_name || 'U').charAt(0).toUpperCase()}
+            </span>
           </button>
-        }
-        subtitle="Ваши группы для хатма"
-      />
-
-      <div className="px-4 py-6">
-
-        {/* Action buttons */}
-        <div className="flex gap-3 mb-6">
-          <motion.button
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            onClick={() => navigate('/create-group')}
-            className="flex-1 btn-primary"
-          >
-            <span className="flex items-center justify-center gap-2">
-              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-              </svg>
-              Создать группу
-            </span>
-          </motion.button>
-
-          <motion.button
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            onClick={() => navigate('/join-group')}
-            className="flex-1 btn-secondary"
-          >
-            <span className="flex items-center justify-center gap-2">
-              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
-              </svg>
-              Вступить
-            </span>
-          </motion.button>
         </div>
+      </motion.div>
 
-        {/* Groups list */}
+      <div className="px-4 pb-6">
+        {/* Daily section */}
+        <DailyCard />
+
+        {/* Groups section */}
+        <h2 className="text-xl font-bold text-gray-800 mb-3">Мои группы:</h2>
+
         {loading ? (
           <LoadingSpinner text="Загрузка групп..." />
         ) : error ? (
           <div className="text-center py-8 text-red-500">{error}</div>
         ) : groups.length === 0 ? (
-          <EmptyState
-            icon="📖"
-            title="Пока нет групп"
-            description="Создайте свою группу для хатма или присоединитесь к существующей"
-            action={{
-              label: "Создать группу",
-              onClick: () => navigate('/create-group')
-            }}
-          />
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="card text-center py-8"
+          >
+            <div className="text-4xl mb-3">📖</div>
+            <h3 className="font-semibold text-gray-800 mb-2">Пока нет групп</h3>
+            <p className="text-gray-500 text-sm mb-4">
+              Создайте свою группу для хатма или присоединитесь к существующей
+            </p>
+            <button
+              onClick={() => navigate('/create-group')}
+              className="btn-primary inline-flex items-center gap-2"
+            >
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+              </svg>
+              Создать группу
+            </button>
+          </motion.div>
         ) : (
           <div className="space-y-3">
             {groups.map((group, index) => (
