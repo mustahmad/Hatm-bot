@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from typing import List
 
@@ -236,13 +236,14 @@ async def leave_group(
 async def create_hatm(
     group_id: int,
     hatm_data: HatmCreate,
-    background_tasks: BackgroundTasks,
     current_user: User = Depends(get_current_user),
     group_service: GroupService = Depends(get_group_service),
     hatm_service: HatmService = Depends(get_hatm_service),
     db: Session = Depends(get_db)
 ):
     """Создать новый хатм в группе"""
+    import asyncio
+
     group = group_service.get_by_id(group_id)
     if not group:
         raise HTTPException(status_code=404, detail="Группа не найдена")
@@ -255,32 +256,54 @@ async def create_hatm(
 
     hatm = hatm_service.create(group, hatm_data)
 
-    # Отправляем уведомления участникам о назначенных джузах в фоне
-    async def send_hatm_notifications():
+    # Собираем данные до закрытия сессии
+    members = group_service.get_members(group)
+    juz_assignments = db.query(JuzAssignment).filter(JuzAssignment.hatm_id == hatm.id).all()
+
+    # Группируем джузы по пользователям
+    user_juzs = {}
+    for juz in juz_assignments:
+        if juz.user_id not in user_juzs:
+            user_juzs[juz.user_id] = []
+        user_juzs[juz.user_id].append(juz)
+
+    # Сохраняем данные для уведомлений
+    notification_data = []
+    for member in members:
+        if member.id in user_juzs and member.telegram_id:
+            notification_data.append({
+                'telegram_id': member.telegram_id,
+                'first_name': member.first_name,
+                'juz_numbers': sorted([j.juz_number for j in user_juzs[member.id]]),
+                'group_name': group.name,
+                'duration_days': hatm.duration_days
+            })
+
+    # Отправляем уведомления асинхронно
+    async def send_notifications():
         notification_service = get_notification_service()
-        if notification_service:
-            # Получаем всех участников и их джузы
-            members = group_service.get_members(group)
-            juz_assignments = db.query(JuzAssignment).filter(JuzAssignment.hatm_id == hatm.id).all()
-
-            # Группируем джузы по пользователям
-            user_juzs = {}
-            for juz in juz_assignments:
-                if juz.user_id not in user_juzs:
-                    user_juzs[juz.user_id] = []
-                user_juzs[juz.user_id].append(juz)
-
-            # Отправляем уведомления каждому участнику
-            for member in members:
-                if member.id in user_juzs and member.telegram_id:
-                    await notification_service.notify_juz_assigned(
-                        user=member,
-                        juz_assignments=user_juzs[member.id],
-                        hatm=hatm,
-                        group=group
+        if notification_service and notification_service.bot:
+            for data in notification_data:
+                try:
+                    juz_list = ", ".join(str(n) for n in data['juz_numbers'])
+                    text = (
+                        f"📖 *Новый хатм начат!*\n\n"
+                        f"Группа: {data['group_name']}\n"
+                        f"Срок: {data['duration_days']} дн.\n\n"
+                        f"Вам назначены джузы: *{juz_list}*\n\n"
+                        f"Да поможет вам Аллах в чтении Корана! 🤲"
                     )
+                    await notification_service.bot.send_message(
+                        chat_id=data['telegram_id'],
+                        text=text,
+                        parse_mode="Markdown"
+                    )
+                except Exception as e:
+                    import logging
+                    logging.error(f"Failed to send notification to {data['telegram_id']}: {e}")
 
-    background_tasks.add_task(send_hatm_notifications)
+    # Запускаем отправку уведомлений в фоне
+    asyncio.create_task(send_notifications())
 
     return HatmResponse(
         id=hatm.id,
@@ -359,13 +382,14 @@ async def get_hatm(
 @router.post("/hatms/{hatm_id}/start", response_model=HatmResponse)
 async def start_hatm(
     hatm_id: int,
-    background_tasks: BackgroundTasks,
     current_user: User = Depends(get_current_user),
     group_service: GroupService = Depends(get_group_service),
     hatm_service: HatmService = Depends(get_hatm_service),
     db: Session = Depends(get_db)
 ):
     """Запустить хатм (распределить джузы)"""
+    import asyncio
+
     hatm = hatm_service.get_by_id(hatm_id)
     if not hatm:
         raise HTTPException(status_code=404, detail="Хатм не найден")
@@ -390,25 +414,47 @@ async def start_hatm(
 
     hatm = hatm_service.start(hatm, participants)
 
-    # Отправляем уведомления участникам в фоне
-    notification_service = get_notification_service()
-    if notification_service:
-        # Группируем джузы по пользователям для уведомлений
-        user_juzs = {}
-        for assignment in db.query(JuzAssignment).filter(JuzAssignment.hatm_id == hatm.id).all():
-            if assignment.user_id not in user_juzs:
-                user_juzs[assignment.user_id] = []
-            user_juzs[assignment.user_id].append(assignment)
+    # Собираем данные для уведомлений до закрытия сессии
+    user_juzs = {}
+    for assignment in db.query(JuzAssignment).filter(JuzAssignment.hatm_id == hatm.id).all():
+        if assignment.user_id not in user_juzs:
+            user_juzs[assignment.user_id] = []
+        user_juzs[assignment.user_id].append(assignment)
 
-        for user in participants:
-            if user.id in user_juzs:
-                background_tasks.add_task(
-                    notification_service.notify_juz_assigned,
-                    user,
-                    user_juzs[user.id],
-                    hatm,
-                    group
-                )
+    notification_data = []
+    for user in participants:
+        if user.id in user_juzs and user.telegram_id:
+            notification_data.append({
+                'telegram_id': user.telegram_id,
+                'juz_numbers': sorted([j.juz_number for j in user_juzs[user.id]]),
+                'group_name': group.name,
+                'duration_days': hatm.duration_days
+            })
+
+    # Отправляем уведомления асинхронно
+    async def send_start_notifications():
+        notification_service = get_notification_service()
+        if notification_service and notification_service.bot:
+            for data in notification_data:
+                try:
+                    juz_list = ", ".join(str(n) for n in data['juz_numbers'])
+                    text = (
+                        f"📖 *Хатм начат!*\n\n"
+                        f"Группа: {data['group_name']}\n"
+                        f"Срок: {data['duration_days']} дн.\n\n"
+                        f"Вам назначены джузы: *{juz_list}*\n\n"
+                        f"Да поможет вам Аллах в чтении Корана! 🤲"
+                    )
+                    await notification_service.bot.send_message(
+                        chat_id=data['telegram_id'],
+                        text=text,
+                        parse_mode="Markdown"
+                    )
+                except Exception as e:
+                    import logging
+                    logging.error(f"Failed to send start notification to {data['telegram_id']}: {e}")
+
+    asyncio.create_task(send_start_notifications())
 
     return HatmResponse(
         id=hatm.id,
@@ -444,13 +490,14 @@ async def get_hatm_progress(
 @router.post("/hatms/{hatm_id}/complete", response_model=HatmResponse)
 async def complete_hatm(
     hatm_id: int,
-    background_tasks: BackgroundTasks,
     current_user: User = Depends(get_current_user),
     group_service: GroupService = Depends(get_group_service),
     hatm_service: HatmService = Depends(get_hatm_service),
     db: Session = Depends(get_db)
 ):
     """Завершить хатм вручную"""
+    import asyncio
+
     hatm = hatm_service.get_by_id(hatm_id)
     if not hatm:
         raise HTTPException(status_code=404, detail="Хатм не найден")
@@ -467,24 +514,43 @@ async def complete_hatm(
 
     hatm = hatm_service.force_complete(hatm)
 
-    # Отправляем уведомления о завершении хатма
-    notification_service = get_notification_service()
-    if notification_service:
-        # Получаем уникальных участников хатма
-        participant_ids = db.query(JuzAssignment.user_id).filter(
-            JuzAssignment.hatm_id == hatm.id
-        ).distinct().all()
+    # Собираем данные до закрытия сессии
+    participant_ids = db.query(JuzAssignment.user_id).filter(
+        JuzAssignment.hatm_id == hatm.id
+    ).distinct().all()
 
-        from app.models.models import User as UserModel
-        for (user_id,) in participant_ids:
-            user = db.query(UserModel).filter(UserModel.id == user_id).first()
-            if user:
-                background_tasks.add_task(
-                    notification_service.notify_hatm_completed,
-                    user,
-                    hatm,
-                    group
-                )
+    from app.models.models import User as UserModel
+    notification_data = []
+    for (user_id,) in participant_ids:
+        user = db.query(UserModel).filter(UserModel.id == user_id).first()
+        if user and user.telegram_id:
+            notification_data.append({
+                'telegram_id': user.telegram_id,
+                'group_name': group.name if group else 'группы'
+            })
+
+    # Отправляем уведомления асинхронно
+    async def send_completion_notifications():
+        notification_service = get_notification_service()
+        if notification_service and notification_service.bot:
+            for data in notification_data:
+                try:
+                    text = (
+                        f"🎉 *Хатм завершен!*\n\n"
+                        f"Группа: {data['group_name']}\n\n"
+                        f"Аллахумма баракалана! Хатм группы успешно завершен!\n"
+                        f"Баракаллаху фикум всем участникам! 🤲"
+                    )
+                    await notification_service.bot.send_message(
+                        chat_id=data['telegram_id'],
+                        text=text,
+                        parse_mode="Markdown"
+                    )
+                except Exception as e:
+                    import logging
+                    logging.error(f"Failed to send completion notification to {data['telegram_id']}: {e}")
+
+    asyncio.create_task(send_completion_notifications())
 
     return HatmResponse(
         id=hatm.id,
@@ -503,7 +569,6 @@ async def complete_hatm(
 @router.post("/juzs/{juz_id}/complete", response_model=JuzResponse)
 async def complete_juz(
     juz_id: int,
-    background_tasks: BackgroundTasks,
     current_user: User = Depends(get_current_user),
     juz_service: JuzService = Depends(get_juz_service),
     hatm_service: HatmService = Depends(get_hatm_service),
@@ -511,6 +576,8 @@ async def complete_juz(
     db: Session = Depends(get_db)
 ):
     """Отметить джуз как прочитанный"""
+    import asyncio
+
     juz = juz_service.get_by_id(juz_id)
     if not juz:
         raise HTTPException(status_code=404, detail="Джуз не найден")
@@ -527,24 +594,44 @@ async def complete_juz(
 
         # Если хатм был завершен, отправляем уведомления
         if was_completed:
-            notification_service = get_notification_service()
-            if notification_service:
-                group = group_service.get_by_id(hatm.group_id)
+            group = group_service.get_by_id(hatm.group_id)
 
-                # Получаем уникальных участников хатма
-                participant_ids = db.query(JuzAssignment.user_id).filter(
-                    JuzAssignment.hatm_id == hatm.id
-                ).distinct().all()
+            # Собираем данные до закрытия сессии
+            participant_ids = db.query(JuzAssignment.user_id).filter(
+                JuzAssignment.hatm_id == hatm.id
+            ).distinct().all()
 
-                from app.models.models import User as UserModel
-                for (user_id,) in participant_ids:
-                    user = db.query(UserModel).filter(UserModel.id == user_id).first()
-                    if user:
-                        background_tasks.add_task(
-                            notification_service.notify_hatm_completed,
-                            user,
-                            hatm,
-                            group
-                        )
+            from app.models.models import User as UserModel
+            notification_data = []
+            for (user_id,) in participant_ids:
+                user = db.query(UserModel).filter(UserModel.id == user_id).first()
+                if user and user.telegram_id:
+                    notification_data.append({
+                        'telegram_id': user.telegram_id,
+                        'group_name': group.name if group else 'группы'
+                    })
+
+            # Отправляем уведомления асинхронно
+            async def send_completion_notifications():
+                notification_service = get_notification_service()
+                if notification_service and notification_service.bot:
+                    for data in notification_data:
+                        try:
+                            text = (
+                                f"🎉 *Хатм завершен!*\n\n"
+                                f"Группа: {data['group_name']}\n\n"
+                                f"Аллахумма баракалана! Хатм группы успешно завершен!\n"
+                                f"Баракаллаху фикум всем участникам! 🤲"
+                            )
+                            await notification_service.bot.send_message(
+                                chat_id=data['telegram_id'],
+                                text=text,
+                                parse_mode="Markdown"
+                            )
+                        except Exception as e:
+                            import logging
+                            logging.error(f"Failed to send completion notification to {data['telegram_id']}: {e}")
+
+            asyncio.create_task(send_completion_notifications())
 
     return juz_service.get_juz_with_user_info(juz)
