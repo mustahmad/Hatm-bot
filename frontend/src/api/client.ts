@@ -85,6 +85,9 @@ export interface JuzAssignment {
   first_name: string | null
   completed_at: string | null
   is_debt: boolean
+  group_name: string | null
+  hatm_number: number | null
+  group_id: number | null
 }
 
 export interface HatmProgress {
@@ -128,6 +131,9 @@ export const api = {
 
   joinGroup: (invite_code: string, initData: string) =>
     apiRequest<Group>('/api/groups/join', { method: 'POST', body: { invite_code }, initData }),
+
+  leaveGroup: (groupId: number, initData: string) =>
+    apiRequest<{ message: string }>(`/api/groups/${groupId}/leave`, { method: 'DELETE', initData }),
 
   // Hatms
   getGroupHatms: (groupId: number, initData: string) =>

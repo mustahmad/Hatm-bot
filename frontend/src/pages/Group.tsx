@@ -17,12 +17,34 @@ export default function Group() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [copied, setCopied] = useState(false)
+  const [leaving, setLeaving] = useState(false)
+  const [leaveError, setLeaveError] = useState<string | null>(null)
 
   const copyInviteCode = () => {
     if (group) {
       navigator.clipboard.writeText(group.invite_code)
       setCopied(true)
       setTimeout(() => setCopied(false), 2000)
+    }
+  }
+
+  const handleLeaveGroup = async () => {
+    if (!initData || !id || !group) return
+
+    const confirmed = window.confirm(
+      `Вы уверены, что хотите покинуть группу "${group.name}"?`
+    )
+    if (!confirmed) return
+
+    try {
+      setLeaving(true)
+      setLeaveError(null)
+      await api.leaveGroup(parseInt(id), initData)
+      navigate('/')
+    } catch (err) {
+      setLeaveError(err instanceof Error ? err.message : 'Ошибка при выходе из группы')
+    } finally {
+      setLeaving(false)
     }
   }
 
@@ -203,11 +225,15 @@ export default function Group() {
           transition={{ delay: 0.3 }}
           className="mt-8 text-center"
         >
+          {leaveError && (
+            <div className="text-sm text-red-500 mb-2">{leaveError}</div>
+          )}
           <button
-            onClick={() => navigate('/')}
-            className="text-sm text-gray-400 hover:text-gray-600 underline transition-colors"
+            onClick={handleLeaveGroup}
+            disabled={leaving}
+            className="text-sm text-gray-400 hover:text-red-500 underline transition-colors disabled:opacity-50"
           >
-            Покинуть группу
+            {leaving ? 'Выход...' : 'Покинуть группу'}
           </button>
         </motion.div>
       </div>

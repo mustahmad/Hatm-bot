@@ -5,6 +5,7 @@ import hmac
 import json
 from urllib.parse import parse_qsl
 import os
+from typing import Optional
 
 from app.database import get_db
 from app.services import UserService, GroupService, HatmService, JuzService
@@ -13,6 +14,12 @@ from app.models.models import User
 
 def get_user_service(db: Session = Depends(get_db)) -> UserService:
     return UserService(db)
+
+
+def get_notification_service():
+    """Получить сервис уведомлений из main"""
+    from app.main import get_notification_service as get_ns
+    return get_ns()
 
 
 def get_group_service(db: Session = Depends(get_db)) -> GroupService:

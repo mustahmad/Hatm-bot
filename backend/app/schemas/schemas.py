@@ -84,6 +84,9 @@ class JuzResponse(BaseModel):
     first_name: Optional[str] = None
     completed_at: Optional[datetime] = None
     is_debt: bool = False
+    group_name: Optional[str] = None
+    hatm_number: Optional[int] = None
+    group_id: Optional[int] = None
 
     class Config:
         from_attributes = True

@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 :root {
-  --tg-theme-bg-color: #f8fdfb;
+  --tg-theme-bg-color: #fafcfb;
   --tg-theme-text-color: #1a1a1a;
   --tg-theme-hint-color: #6b7280;
   --tg-theme-link-color: #10b981;
@@ -11,23 +11,23 @@
   --tg-theme-button-text-color: #ffffff;
   --tg-theme-secondary-bg-color: #ffffff;
 
-  /* Перламутрово-зелёная гамма */
-  --pearl-green-1: #f0fdf8;
-  --pearl-green-2: #e6f7f0;
-  --pearl-green-3: #d1f5e8;
-  --pearl-mint: #c8f5e3;
-  --pearl-cyan: #e0f7f4;
-  --pearl-white: #fafffe;
+  /* Более белая гамма с лёгким зелёным оттенком */
+  --pearl-green-1: #f9fcfb;
+  --pearl-green-2: #f5faf8;
+  --pearl-green-3: #f0f8f5;
+  --pearl-mint: #edf7f3;
+  --pearl-cyan: #f2faf8;
+  --pearl-white: #fdfffe;
 
-  /* Основной перламутровый градиент */
+  /* Очень мягкий градиент - почти белый */
   --pearl-shimmer: linear-gradient(
     135deg,
-    #f0fdf8 0%,
-    #e6f7f0 20%,
-    #d8f5ed 40%,
-    #e0f7f4 60%,
-    #e8f9f2 80%,
-    #f0fdf8 100%
+    #fdfffe 0%,
+    #f9fcfb 20%,
+    #f5faf8 40%,
+    #f7fbf9 60%,
+    #f9fcfb 80%,
+    #fdfffe 100%
   );
 
   /* Зелёные акценты */
@@ -56,14 +56,14 @@ body {
   overflow-x: hidden;
 }
 
-/* Перламутровые размытые блобы на фоне */
+/* Очень мягкие размытые блобы на фоне */
 body::before,
 body::after {
   content: '';
   position: fixed;
   border-radius: 50%;
-  filter: blur(80px);
-  opacity: 0.6;
+  filter: blur(100px);
+  opacity: 0.25;
   pointer-events: none;
   z-index: 0;
 }
@@ -71,7 +71,7 @@ body::after {
 body::before {
   width: 400px;
   height: 400px;
-  background: linear-gradient(135deg, #a7f3d0 0%, #6ee7b7 50%, #34d399 100%);
+  background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 50%, #6ee7b7 100%);
   top: -100px;
   right: -100px;
   animation: floatBlob1 25s ease-in-out infinite;
@@ -80,7 +80,7 @@ body::before {
 body::after {
   width: 350px;
   height: 350px;
-  background: linear-gradient(135deg, #99f6e4 0%, #5eead4 50%, #2dd4bf 100%);
+  background: linear-gradient(135deg, #ccfbf1 0%, #99f6e4 50%, #5eead4 100%);
   bottom: -80px;
   left: -80px;
   animation: floatBlob2 20s ease-in-out infinite;
@@ -285,25 +285,25 @@ textarea {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 48px;
-  height: 48px;
+  width: 44px;
+  height: 44px;
   border-radius: 12px;
-  background: rgba(255, 255, 255, 0.85);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  box-shadow: 0 4px 20px rgba(16, 185, 129, 0.1), 0 1px 3px rgba(0, 0, 0, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.8);
+  background: rgba(255, 255, 255, 0.5);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  box-shadow: 0 2px 10px rgba(16, 185, 129, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.4);
   color: #10b981;
-  font-size: 20px;
-  animation: floatIcon 8s ease-in-out infinite;
+  opacity: 0.35;
+  font-size: 18px;
+  animation: floatIcon 12s ease-in-out infinite;
 }
 
 .floating-icon svg {
-  width: 22px;
-  height: 22px;
+  width: 20px;
+  height: 20px;
   stroke: #10b981;
   stroke-width: 1.5;
-  fill: none;
 }
 
 .floating-icon--left {
@@ -348,4 +348,101 @@ textarea {
   opacity: 0.3;
   filter: blur(8px);
   z-index: -1;
+}
+
+/* Исламские иконки на фоне */
+.islamic-bg-pattern {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+}
+
+.islamic-bg-icon {
+  position: absolute;
+  opacity: 0.04;
+  color: #10b981;
+  animation: floatIconSlow 20s ease-in-out infinite;
+}
+
+.islamic-bg-icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+.islamic-bg-icon--1 {
+  width: 80px;
+  height: 80px;
+  top: 10%;
+  left: 5%;
+  animation-delay: 0s;
+}
+
+.islamic-bg-icon--2 {
+  width: 60px;
+  height: 60px;
+  top: 25%;
+  right: 8%;
+  animation-delay: -3s;
+}
+
+.islamic-bg-icon--3 {
+  width: 70px;
+  height: 70px;
+  top: 45%;
+  left: 10%;
+  animation-delay: -6s;
+}
+
+.islamic-bg-icon--4 {
+  width: 50px;
+  height: 50px;
+  top: 60%;
+  right: 15%;
+  animation-delay: -9s;
+}
+
+.islamic-bg-icon--5 {
+  width: 65px;
+  height: 65px;
+  top: 75%;
+  left: 8%;
+  animation-delay: -12s;
+}
+
+.islamic-bg-icon--6 {
+  width: 55px;
+  height: 55px;
+  top: 85%;
+  right: 5%;
+  animation-delay: -15s;
+}
+
+.islamic-bg-icon--7 {
+  width: 45px;
+  height: 45px;
+  top: 5%;
+  right: 25%;
+  animation-delay: -4s;
+}
+
+.islamic-bg-icon--8 {
+  width: 75px;
+  height: 75px;
+  top: 35%;
+  right: 3%;
+  animation-delay: -8s;
+}
+
+@keyframes floatIconSlow {
+  0%, 100% {
+    transform: translateY(0) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-15px) rotate(5deg);
+  }
 }

@@ -120,7 +120,7 @@ export default function Profile() {
               </motion.div>
             )}
 
-            {/* My juzs list */}
+            {/* My juzs list grouped by group/hatm */}
             {stats.juzs && stats.juzs.length > 0 && (
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
@@ -128,34 +128,64 @@ export default function Profile() {
                 transition={{ delay: 0.3 }}
               >
                 <h3 className="text-lg font-semibold mb-4 text-green-700">Мои джузы</h3>
-                <div className="space-y-2">
-                  {stats.juzs.map((juz) => (
-                    <div
-                      key={juz.id}
-                      className={`card flex items-center justify-between ${
-                        juz.status === 'completed' ? 'bg-green-50' :
-                        juz.status === 'debt' ? 'bg-orange-50' : ''
-                      }`}
-                    >
-                      <div className="flex items-center gap-3">
-                        <div className={`
-                          w-10 h-10 rounded-full flex items-center justify-center text-white font-bold
-                          ${juz.status === 'completed' ? 'bg-green-500' :
-                            juz.status === 'debt' ? 'bg-orange-500' : 'bg-gray-400'}
-                        `}>
-                          {juz.juz_number}
-                        </div>
-                        <span className="font-medium">Джуз {juz.juz_number}</span>
+                <div className="space-y-4">
+                  {/* Группируем джузы по группе и хатму */}
+                  {Object.entries(
+                    stats.juzs.reduce((acc, juz) => {
+                      const key = `${juz.group_id || 'unknown'}-${juz.hatm_number || 0}`
+                      if (!acc[key]) {
+                        acc[key] = {
+                          group_name: juz.group_name,
+                          hatm_number: juz.hatm_number,
+                          group_id: juz.group_id,
+                          juzs: []
+                        }
+                      }
+                      acc[key].juzs.push(juz)
+                      return acc
+                    }, {} as Record<string, { group_name: string | null, hatm_number: number | null, group_id: number | null, juzs: typeof stats.juzs }>)
+                  ).map(([key, group]) => (
+                    <div key={key} className="space-y-2">
+                      {/* Заголовок группы/хатма */}
+                      <div className="flex items-center gap-2 px-1">
+                        <span className="text-sm font-medium text-gray-600">
+                          {group.group_name || 'Группа'}
+                        </span>
+                        <span className="text-xs text-gray-400">•</span>
+                        <span className="text-sm text-gray-500">
+                          Хатм #{group.hatm_number || 1}
+                        </span>
                       </div>
-                      <span className={`
-                        text-xs px-3 py-1 rounded-full font-medium
-                        ${juz.status === 'completed' ? 'bg-green-100 text-green-700' : ''}
-                        ${juz.status === 'debt' ? 'bg-orange-100 text-orange-700' : ''}
-                        ${juz.status === 'pending' ? 'bg-gray-100 text-gray-600' : ''}
-                      `}>
-                        {juz.status === 'completed' ? 'Прочитан' :
-                         juz.status === 'debt' ? 'Долг' : 'Ожидает'}
-                      </span>
+                      {/* Джузы этого хатма */}
+                      {group.juzs.map((juz) => (
+                        <div
+                          key={juz.id}
+                          className={`card flex items-center justify-between ${
+                            juz.status === 'completed' ? 'bg-green-50' :
+                            juz.status === 'debt' ? 'bg-orange-50' : ''
+                          }`}
+                        >
+                          <div className="flex items-center gap-3">
+                            <div className={`
+                              w-10 h-10 rounded-full flex items-center justify-center text-white font-bold
+                              ${juz.status === 'completed' ? 'bg-green-500' :
+                                juz.status === 'debt' ? 'bg-orange-500' : 'bg-gray-400'}
+                            `}>
+                              {juz.juz_number}
+                            </div>
+                            <span className="font-medium">Джуз {juz.juz_number}</span>
+                          </div>
+                          <span className={`
+                            text-xs px-3 py-1 rounded-full font-medium
+                            ${juz.status === 'completed' ? 'bg-green-100 text-green-700' : ''}
+                            ${juz.status === 'debt' ? 'bg-orange-100 text-orange-700' : ''}
+                            ${juz.status === 'pending' ? 'bg-gray-100 text-gray-600' : ''}
+                          `}>
+                            {juz.status === 'completed' ? 'Прочитан' :
+                             juz.status === 'debt' ? 'Долг' : 'Ожидает'}
+                          </span>
+                        </div>
+                      ))}
                     </div>
                   ))}
                 </div>

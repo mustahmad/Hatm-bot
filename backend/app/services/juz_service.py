@@ -1,8 +1,9 @@
 from sqlalchemy.orm import Session
-from typing import List, Optional
+from sqlalchemy import func
+from typing import List, Optional, Dict, Tuple
 from datetime import datetime
 
-from app.models.models import JuzAssignment, JuzStatus, User, Hatm, HatmStatus
+from app.models.models import JuzAssignment, JuzStatus, User, Hatm, HatmStatus, Group
 from app.schemas.schemas import JuzResponse, UserJuzStats, UserDebtResponse
 
 
@@ -57,6 +58,28 @@ class JuzService:
             .all()
         )
 
+    def _get_hatm_info_cache(self, hatm_ids: List[int]) -> Dict[int, Tuple[str, int, int]]:
+        """Получить информацию о хатмах (group_name, hatm_number, group_id)"""
+        cache = {}
+        if not hatm_ids:
+            return cache
+
+        # Получаем все хатмы и их группы
+        hatms = self.db.query(Hatm).filter(Hatm.id.in_(hatm_ids)).all()
+
+        for hatm in hatms:
+            group = self.db.query(Group).filter(Group.id == hatm.group_id).first()
+            if group:
+                # Вычисляем номер хатма в группе (по порядку создания)
+                hatm_number = (
+                    self.db.query(Hatm)
+                    .filter(Hatm.group_id == group.id, Hatm.id <= hatm.id)
+                    .count()
+                )
+                cache[hatm.id] = (group.name, hatm_number, group.id)
+
+        return cache
+
     def get_user_stats(self, user: User) -> UserJuzStats:
         """Получить статистику пользователя по джузам"""
         all_juzs = self.get_user_juzs(user)
@@ -65,15 +88,23 @@ class JuzService:
         pending = sum(1 for j in all_juzs if j.status == JuzStatus.PENDING)
         debts = sum(1 for j in all_juzs if j.is_debt)
 
+        # Получаем информацию о хатмах для всех джузов
+        hatm_ids = list(set(j.hatm_id for j in all_juzs))
+        hatm_info = self._get_hatm_info_cache(hatm_ids)
+
         juz_responses = []
         for j in all_juzs:
+            group_name, hatm_number, group_id = hatm_info.get(j.hatm_id, (None, None, None))
             juz_responses.append(JuzResponse(
                 id=j.id,
                 juz_number=j.juz_number,
                 status=j.status,
                 user_id=j.user_id,
                 completed_at=j.completed_at,
-                is_debt=j.is_debt
+                is_debt=j.is_debt,
+                group_name=group_name,
+                hatm_number=hatm_number,
+                group_id=group_id
             ))
 
         return UserJuzStats(

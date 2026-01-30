@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks
 from sqlalchemy.orm import Session
 from typing import List
 
@@ -8,9 +8,10 @@ from app.api.deps import (
     get_group_service,
     get_hatm_service,
     get_juz_service,
-    get_user_service
+    get_user_service,
+    get_notification_service
 )
-from app.models.models import User, HatmStatus
+from app.models.models import User, HatmStatus, JuzAssignment
 from app.schemas.schemas import (
     GroupCreate, GroupResponse, GroupDetailResponse, GroupJoinRequest,
     HatmCreate, HatmResponse, HatmDetailResponse, HatmProgress,
@@ -197,6 +198,38 @@ async def get_group_members(
     ]
 
 
+@router.delete("/groups/{group_id}/leave")
+async def leave_group(
+    group_id: int,
+    current_user: User = Depends(get_current_user),
+    group_service: GroupService = Depends(get_group_service)
+):
+    """Покинуть группу"""
+    group = group_service.get_by_id(group_id)
+    if not group:
+        raise HTTPException(status_code=404, detail="Группа не найдена")
+
+    if not group_service.is_member(group, current_user):
+        raise HTTPException(status_code=400, detail="Вы не являетесь участником группы")
+
+    # Проверяем, есть ли активный хатм
+    if group_service.has_active_hatm(group):
+        raise HTTPException(
+            status_code=400,
+            detail="Нельзя покинуть группу с активным хатмом"
+        )
+
+    # Нельзя покинуть группу если ты создатель
+    if group.creator_id == current_user.id:
+        raise HTTPException(
+            status_code=400,
+            detail="Создатель не может покинуть группу. Передайте права или удалите группу."
+        )
+
+    group_service.remove_member(group, current_user)
+    return {"message": "Вы покинули группу"}
+
+
 # ============== Hatm Routes ==============
 
 @router.post("/groups/{group_id}/hatms", response_model=HatmResponse)
@@ -296,6 +329,7 @@ async def get_hatm(
 @router.post("/hatms/{hatm_id}/start", response_model=HatmResponse)
 async def start_hatm(
     hatm_id: int,
+    background_tasks: BackgroundTasks,
     current_user: User = Depends(get_current_user),
     group_service: GroupService = Depends(get_group_service),
     hatm_service: HatmService = Depends(get_hatm_service),
@@ -325,6 +359,26 @@ async def start_hatm(
         participants = participants[:hatm.participants_count]
 
     hatm = hatm_service.start(hatm, participants)
+
+    # Отправляем уведомления участникам в фоне
+    notification_service = get_notification_service()
+    if notification_service:
+        # Группируем джузы по пользователям для уведомлений
+        user_juzs = {}
+        for assignment in db.query(JuzAssignment).filter(JuzAssignment.hatm_id == hatm.id).all():
+            if assignment.user_id not in user_juzs:
+                user_juzs[assignment.user_id] = []
+            user_juzs[assignment.user_id].append(assignment)
+
+        for user in participants:
+            if user.id in user_juzs:
+                background_tasks.add_task(
+                    notification_service.notify_juz_assigned,
+                    user,
+                    user_juzs[user.id],
+                    hatm,
+                    group
+                )
 
     return HatmResponse(
         id=hatm.id,
@@ -360,9 +414,11 @@ async def get_hatm_progress(
 @router.post("/hatms/{hatm_id}/complete", response_model=HatmResponse)
 async def complete_hatm(
     hatm_id: int,
+    background_tasks: BackgroundTasks,
     current_user: User = Depends(get_current_user),
     group_service: GroupService = Depends(get_group_service),
-    hatm_service: HatmService = Depends(get_hatm_service)
+    hatm_service: HatmService = Depends(get_hatm_service),
+    db: Session = Depends(get_db)
 ):
     """Завершить хатм вручную"""
     hatm = hatm_service.get_by_id(hatm_id)
@@ -381,6 +437,25 @@ async def complete_hatm(
 
     hatm = hatm_service.force_complete(hatm)
 
+    # Отправляем уведомления о завершении хатма
+    notification_service = get_notification_service()
+    if notification_service:
+        # Получаем уникальных участников хатма
+        participant_ids = db.query(JuzAssignment.user_id).filter(
+            JuzAssignment.hatm_id == hatm.id
+        ).distinct().all()
+
+        from app.models.models import User as UserModel
+        for (user_id,) in participant_ids:
+            user = db.query(UserModel).filter(UserModel.id == user_id).first()
+            if user:
+                background_tasks.add_task(
+                    notification_service.notify_hatm_completed,
+                    user,
+                    hatm,
+                    group
+                )
+
     return HatmResponse(
         id=hatm.id,
         group_id=hatm.group_id,
@@ -398,9 +473,12 @@ async def complete_hatm(
 @router.post("/juzs/{juz_id}/complete", response_model=JuzResponse)
 async def complete_juz(
     juz_id: int,
+    background_tasks: BackgroundTasks,
     current_user: User = Depends(get_current_user),
     juz_service: JuzService = Depends(get_juz_service),
-    hatm_service: HatmService = Depends(get_hatm_service)
+    hatm_service: HatmService = Depends(get_hatm_service),
+    group_service: GroupService = Depends(get_group_service),
+    db: Session = Depends(get_db)
 ):
     """Отметить джуз как прочитанный"""
     juz = juz_service.get_by_id(juz_id)
@@ -415,6 +493,28 @@ async def complete_juz(
     # Проверяем, завершен ли хатм
     hatm = hatm_service.get_by_id(juz.hatm_id)
     if hatm:
-        hatm_service.check_and_complete(hatm)
+        was_completed = hatm_service.check_and_complete(hatm)
+
+        # Если хатм был завершен, отправляем уведомления
+        if was_completed:
+            notification_service = get_notification_service()
+            if notification_service:
+                group = group_service.get_by_id(hatm.group_id)
+
+                # Получаем уникальных участников хатма
+                participant_ids = db.query(JuzAssignment.user_id).filter(
+                    JuzAssignment.hatm_id == hatm.id
+                ).distinct().all()
+
+                from app.models.models import User as UserModel
+                for (user_id,) in participant_ids:
+                    user = db.query(UserModel).filter(UserModel.id == user_id).first()
+                    if user:
+                        background_tasks.add_task(
+                            notification_service.notify_hatm_completed,
+                            user,
+                            hatm,
+                            group
+                        )
 
     return juz_service.get_juz_with_user_info(juz)
