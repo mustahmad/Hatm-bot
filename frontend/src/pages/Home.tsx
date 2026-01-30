@@ -40,26 +40,28 @@ export default function Home() {
         animate={{ opacity: 1, y: 0 }}
         className="px-4 pt-6 pb-4"
       >
-        <div className="flex items-start justify-between">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-800">
-              Ассалям алейкум,
-            </h1>
-            <h1 className="text-2xl font-bold text-gray-800 mb-1">
-              {user?.first_name || 'друг'}!
-            </h1>
-            <p className="text-emerald-600 text-sm font-medium">
-              Ваши группы для хатма
-            </p>
+        <div className="bg-white rounded-2xl p-4 shadow-sm">
+          <div className="flex items-start justify-between">
+            <div>
+              <h1 className="text-2xl font-bold text-gray-800">
+                Ассалям алейкум,
+              </h1>
+              <h1 className="text-2xl font-bold text-gray-800 mb-1">
+                {user?.first_name || 'друг'}!
+              </h1>
+              <p className="text-emerald-600 text-sm font-medium">
+                Ваши группы для хатма
+              </p>
+            </div>
+            <button
+              onClick={() => navigate('/profile')}
+              className="w-12 h-12 rounded-full bg-emerald-500 flex items-center justify-center shadow-lg"
+            >
+              <span className="text-white text-lg font-semibold">
+                {(user?.first_name || 'U').charAt(0).toUpperCase()}
+              </span>
+            </button>
           </div>
-          <button
-            onClick={() => navigate('/profile')}
-            className="w-12 h-12 rounded-full bg-emerald-500 flex items-center justify-center shadow-lg"
-          >
-            <span className="text-white text-lg font-semibold">
-              {(user?.first_name || 'U').charAt(0).toUpperCase()}
-            </span>
-          </button>
         </div>
       </motion.div>
 
