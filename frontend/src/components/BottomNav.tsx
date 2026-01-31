@@ -80,13 +80,13 @@ export default function BottomNav() {
         )}
       </AnimatePresence>
 
-      {/* Bottom navigation */}
+      {/* Bottom navigation - floating pill */}
       <motion.div
         initial={{ y: 100 }}
         animate={{ y: 0 }}
-        className="fixed bottom-0 left-0 right-0 glass-nav px-6 py-2 pb-safe z-30"
+        className="fixed bottom-4 left-4 right-4 z-30"
       >
-        <div className="flex justify-between items-center max-w-md mx-auto">
+        <div className="glass-nav-floating rounded-[20px] px-4 py-2 max-w-md mx-auto flex justify-between items-center">
           {/* Create button */}
           <button
             onClick={() => setShowMenu(!showMenu)}
@@ -170,6 +170,9 @@ export default function BottomNav() {
           </button>
         </div>
       </motion.div>
+
+      {/* Fade overlay at bottom of screen */}
+      <div className="fixed bottom-0 left-0 right-0 h-24 pointer-events-none z-20 bottom-fade-overlay" />
     </>
   )
 }

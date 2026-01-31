@@ -73,7 +73,7 @@ export default function Profile() {
         showBack
       />
 
-      <div className="px-4 py-6">
+      <div className="px-4 pt-6 pb-28">
         {/* User info */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}

@@ -415,3 +415,41 @@ textarea {
   0%, 100% { transform: translateZ(0) translateY(0); }
   50% { transform: translateZ(0) translateY(-8px); }
 }
+
+/* Floating Nav Pill - отдельная плашка */
+.glass-nav-floating {
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.08),
+    0 4px 16px rgba(16, 185, 129, 0.06),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  transform: translateZ(0);
+}
+
+/* Bottom fade overlay - эффект исчезания в тени */
+.bottom-fade-overlay {
+  background: linear-gradient(
+    to bottom,
+    transparent 0%,
+    rgba(249, 252, 251, 0.4) 40%,
+    rgba(249, 252, 251, 0.8) 70%,
+    rgba(249, 252, 251, 0.95) 100%
+  );
+  transform: translateZ(0);
+}
+
+/* Добавляем padding внизу для контента чтобы не перекрывался плашкой */
+.pb-nav-safe {
+  padding-bottom: 100px;
+}
+
+/* Mobile optimizations for floating nav */
+@media (hover: none) and (pointer: coarse) {
+  .glass-nav-floating {
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+}

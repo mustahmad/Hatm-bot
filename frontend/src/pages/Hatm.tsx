@@ -149,7 +149,7 @@ export default function Hatm() {
         showBack
       />
 
-      <div className="px-4 py-6">
+      <div className="px-4 pt-6 pb-28">
         {/* Pending state - show start button */}
         {hatm.status === 'pending' && (
           <motion.div

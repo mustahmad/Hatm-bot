@@ -63,7 +63,7 @@ export default function Home() {
         </div>
       </motion.div>
 
-      <div className="px-4 pb-6">
+      <div className="px-4 pb-28">
         {/* Daily section */}
         <DailyCard />
 
