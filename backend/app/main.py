@@ -1,12 +1,15 @@
 import asyncio
 import logging
 import os
+from pathlib import Path
 from contextlib import asynccontextmanager
 from dotenv import load_dotenv
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 from aiogram import Bot, Dispatcher
 from aiogram.enums import ParseMode
 from aiogram.client.default import DefaultBotProperties
@@ -15,6 +18,9 @@ from app.database import init_db
 from app.api.routes import router as api_router
 from app.bot.handlers import router as bot_router
 from app.bot.notifications import NotificationService
+
+# Путь к статическим файлам фронтенда
+STATIC_DIR = Path(__file__).parent.parent / "static"
 
 # Загрузка переменных окружения
 load_dotenv()
@@ -117,20 +123,46 @@ app.add_middleware(GZipMiddleware, minimum_size=500)
 app.include_router(api_router, prefix="/api")
 
 
-@app.get("/")
-async def root():
-    """Корневой эндпоинт"""
-    return {
-        "status": "ok",
-        "message": "Hatm Bot API is running",
-        "version": "1.0.0"
-    }
-
-
 @app.get("/health")
 async def health():
     """Проверка здоровья сервиса"""
     return {"status": "healthy"}
+
+
+# Раздача статических файлов фронтенда
+if STATIC_DIR.exists():
+    # Монтируем папку с ассетами
+    app.mount("/assets", StaticFiles(directory=STATIC_DIR / "assets"), name="assets")
+
+    # Отдаём статические файлы (favicon, logo и т.д.)
+    @app.get("/logo.png")
+    async def logo():
+        return FileResponse(STATIC_DIR / "logo.png")
+
+    @app.get("/favicon.ico")
+    async def favicon():
+        favicon_path = STATIC_DIR / "favicon.ico"
+        if favicon_path.exists():
+            return FileResponse(favicon_path)
+        return FileResponse(STATIC_DIR / "logo.png")
+
+    # SPA fallback - все остальные маршруты отдают index.html
+    @app.get("/{full_path:path}")
+    async def serve_spa(full_path: str):
+        """Отдаём index.html для всех маршрутов SPA"""
+        # Пропускаем API и health
+        if full_path.startswith("api/") or full_path == "health":
+            return {"detail": "Not Found"}
+        return FileResponse(STATIC_DIR / "index.html")
+else:
+    @app.get("/")
+    async def root():
+        """Корневой эндпоинт когда фронтенд не собран"""
+        return {
+            "status": "ok",
+            "message": "Hatm Bot API is running",
+            "version": "1.0.0"
+        }
 
 
 def get_notification_service() -> NotificationService:
