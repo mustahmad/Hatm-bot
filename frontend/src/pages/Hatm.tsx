@@ -62,14 +62,34 @@ export default function Hatm() {
   }
 
   const completeJuz = async (juz: JuzAssignment) => {
-    if (!initData || completing) return
+    if (!initData || completing || !progress) return
+
+    // Оптимистичное обновление - сразу обновляем UI
+    const previousProgress = progress
+    const updatedAssignments = progress.juz_assignments.map(a =>
+      a.id === juz.id
+        ? { ...a, status: 'completed' as const, completed_at: new Date().toISOString() }
+        : a
+    )
+
+    setProgress({
+      ...progress,
+      completed_juzs: progress.completed_juzs + 1,
+      pending_juzs: Math.max(0, progress.pending_juzs - 1),
+      progress_percent: Math.round(((progress.completed_juzs + 1) / 30) * 100 * 10) / 10,
+      juz_assignments: updatedAssignments
+    })
+
+    // Haptic feedback сразу
+    webApp?.HapticFeedback.notificationOccurred('success')
+    setCompleting(juz.id)
 
     try {
-      setCompleting(juz.id)
+      // API запрос в фоне
       await api.completeJuz(juz.id, initData)
-      await loadHatm()
-      webApp?.HapticFeedback.notificationOccurred('success')
     } catch (err) {
+      // Откатываем при ошибке
+      setProgress(previousProgress)
       setError(err instanceof Error ? err.message : 'Ошибка')
       webApp?.HapticFeedback.notificationOccurred('error')
     } finally {

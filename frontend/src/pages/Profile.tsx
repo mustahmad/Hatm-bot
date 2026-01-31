@@ -32,15 +32,34 @@ export default function Profile() {
   }
 
   const completeJuz = async (juzId: number) => {
-    if (!initData || completing) return
+    if (!initData || completing || !stats) return
+
+    // Оптимистичное обновление - сразу обновляем UI без ожидания сервера
+    const previousStats = stats
+    const updatedJuzs = stats.juzs.map(juz =>
+      juz.id === juzId
+        ? { ...juz, status: 'completed' as const, completed_at: new Date().toISOString() }
+        : juz
+    )
+
+    setStats({
+      ...stats,
+      completed: stats.completed + 1,
+      pending: Math.max(0, stats.pending - 1),
+      juzs: updatedJuzs
+    })
+
+    // Haptic feedback сразу
+    webApp?.HapticFeedback.notificationOccurred('success')
+    setCompleting(juzId)
 
     try {
-      setCompleting(juzId)
+      // API запрос в фоне - не блокируем UI
       await api.completeJuz(juzId, initData)
-      await loadStats()
-      webApp?.HapticFeedback.notificationOccurred('success')
     } catch (err) {
+      // Откатываем изменения при ошибке
       console.error(err)
+      setStats(previousStats)
       webApp?.HapticFeedback.notificationOccurred('error')
     } finally {
       setCompleting(null)
