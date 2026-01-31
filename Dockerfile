@@ -20,8 +20,8 @@ COPY backend/ ./
 # Copy frontend build
 COPY --from=frontend-builder /app/frontend/dist ./static
 
-# Expose port
-EXPOSE 8000
+# Railway uses dynamic PORT
+ENV PORT=8000
 
-# Start command
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "1", "--limit-concurrency", "200", "--timeout-keep-alive", "30"]
+# Start command (shell form to expand $PORT)
+CMD uvicorn app.main:app --host 0.0.0.0 --port $PORT --workers 1 --limit-concurrency 200 --timeout-keep-alive 30
