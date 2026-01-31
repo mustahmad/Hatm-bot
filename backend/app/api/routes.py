@@ -79,8 +79,9 @@ async def get_my_groups(
     current_user: User = Depends(get_current_user),
     group_service: GroupService = Depends(get_group_service)
 ):
-    """Получить список групп пользователя"""
-    groups = group_service.get_user_groups(current_user)
+    """Получить список групп пользователя - оптимизировано (1 запрос вместо N+1)"""
+    # Используем оптимизированный метод с batch загрузкой stats
+    groups_with_stats = group_service.get_user_groups_with_stats(current_user)
     return [
         GroupResponse(
             id=g.id,
@@ -88,10 +89,10 @@ async def get_my_groups(
             invite_code=g.invite_code,
             creator_id=g.creator_id,
             created_at=g.created_at,
-            members_count=group_service.get_members_count(g),
-            has_active_hatm=group_service.has_active_hatm(g)
+            members_count=members_count,
+            has_active_hatm=has_active_hatm
         )
-        for g in groups
+        for g, members_count, has_active_hatm in groups_with_stats
     ]
 
 

@@ -1,6 +1,6 @@
 import random
-from sqlalchemy.orm import Session
-from typing import List, Optional
+from sqlalchemy.orm import Session, joinedload
+from typing import List, Optional, Dict
 from datetime import datetime, timedelta
 
 from app.models.models import Hatm, HatmStatus, JuzAssignment, JuzStatus, Group, GroupMember, User
@@ -94,9 +94,11 @@ class HatmService:
                 juz_index += 1
 
     def get_progress(self, hatm: Hatm) -> HatmProgress:
-        """Получить прогресс хатма"""
+        """Получить прогресс хатма - оптимизировано с batch загрузкой пользователей"""
+        # Используем joinedload для загрузки user вместе с assignment - 1 запрос вместо N+1
         assignments = (
             self.db.query(JuzAssignment)
+            .options(joinedload(JuzAssignment.user))
             .filter(JuzAssignment.hatm_id == hatm.id)
             .order_by(JuzAssignment.juz_number)
             .all()
@@ -108,7 +110,8 @@ class HatmService:
 
         juz_responses = []
         for a in assignments:
-            user = self.db.query(User).filter(User.id == a.user_id).first()
+            # User уже загружен через joinedload - нет дополнительного запроса
+            user = a.user
             juz_responses.append(JuzResponse(
                 id=a.id,
                 juz_number=a.juz_number,
