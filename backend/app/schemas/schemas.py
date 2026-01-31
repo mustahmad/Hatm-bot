@@ -79,7 +79,7 @@ class JuzResponse(BaseModel):
     id: int
     juz_number: int
     status: JuzStatus
-    user_id: int
+    user_id: Optional[int] = None  # NULL = unassigned juz
     username: Optional[str] = None
     first_name: Optional[str] = None
     completed_at: Optional[datetime] = None

@@ -80,7 +80,7 @@ export interface JuzAssignment {
   id: number
   juz_number: number
   status: 'pending' | 'completed' | 'debt'
-  user_id: number
+  user_id: number | null  // null = unassigned juz
   username: string | null
   first_name: string | null
   completed_at: string | null

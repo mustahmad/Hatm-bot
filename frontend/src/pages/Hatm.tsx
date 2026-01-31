@@ -190,35 +190,54 @@ export default function Hatm() {
             </motion.div>
 
             {/* Stats */}
-            <div className="grid grid-cols-3 gap-3 mb-8">
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.1 }}
-                className="card text-center"
-              >
-                <div className="text-2xl font-bold text-green-600">{progress.completed_juzs}</div>
-                <div className="text-xs text-gray-500">Прочитано</div>
-              </motion.div>
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.15 }}
-                className="card text-center"
-              >
-                <div className="text-2xl font-bold text-gray-600">{progress.pending_juzs}</div>
-                <div className="text-xs text-gray-500">Осталось</div>
-              </motion.div>
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.2 }}
-                className="card text-center"
-              >
-                <div className="text-2xl font-bold text-orange-600">{progress.debt_juzs}</div>
-                <div className="text-xs text-gray-500">Долги</div>
-              </motion.div>
-            </div>
+            {(() => {
+              const unassignedCount = progress.juz_assignments.filter(j => j.user_id === null).length
+              const hasUnassigned = unassignedCount > 0
+              return (
+                <>
+                  <div className={`grid ${hasUnassigned ? 'grid-cols-4' : 'grid-cols-3'} gap-2 mb-8`}>
+                    <motion.div
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.1 }}
+                      className="card text-center py-3"
+                    >
+                      <div className="text-xl font-bold text-green-600">{progress.completed_juzs}</div>
+                      <div className="text-xs text-gray-500">Прочитано</div>
+                    </motion.div>
+                    <motion.div
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.15 }}
+                      className="card text-center py-3"
+                    >
+                      <div className="text-xl font-bold text-gray-600">{progress.pending_juzs - unassignedCount}</div>
+                      <div className="text-xs text-gray-500">Осталось</div>
+                    </motion.div>
+                    {hasUnassigned && (
+                      <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.18 }}
+                        className="card text-center py-3"
+                      >
+                        <div className="text-xl font-bold text-blue-500">{unassignedCount}</div>
+                        <div className="text-xs text-gray-500">Без участника</div>
+                      </motion.div>
+                    )}
+                    <motion.div
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.2 }}
+                      className="card text-center py-3"
+                    >
+                      <div className="text-xl font-bold text-orange-600">{progress.debt_juzs}</div>
+                      <div className="text-xs text-gray-500">Долги</div>
+                    </motion.div>
+                  </div>
+                </>
+              )
+            })()}
 
             {/* Completed banner */}
             {hatm.status === 'completed' && (

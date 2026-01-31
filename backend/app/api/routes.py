@@ -152,14 +152,58 @@ async def get_group(
 async def join_group(
     join_data: GroupJoinRequest,
     current_user: User = Depends(get_current_user),
-    group_service: GroupService = Depends(get_group_service)
+    group_service: GroupService = Depends(get_group_service),
+    hatm_service: HatmService = Depends(get_hatm_service)
 ):
     """Вступить в группу по коду приглашения"""
+    import asyncio
+
     group = group_service.get_by_invite_code(join_data.invite_code)
     if not group:
         raise HTTPException(status_code=404, detail="Группа не найдена")
 
+    # Проверяем, не является ли уже участником
+    is_already_member = group_service.is_member(group, current_user)
+
     group_service.add_member(group, current_user)
+
+    # Если это новый участник и есть активный хатм - назначаем джузы
+    if not is_already_member:
+        active_hatm = group_service.get_active_hatm(group)
+        if active_hatm:
+            assigned_juzs = hatm_service.assign_juzs_to_new_member(active_hatm, current_user)
+
+            # Отправляем уведомление если джузы назначены
+            if assigned_juzs and current_user.telegram_id:
+                notification_data = {
+                    'telegram_id': current_user.telegram_id,
+                    'juz_numbers': sorted([j.juz_number for j in assigned_juzs]),
+                    'group_name': group.name,
+                    'duration_days': active_hatm.duration_days
+                }
+
+                async def send_assignment_notification():
+                    notification_service = get_notification_service()
+                    if notification_service and notification_service.bot:
+                        try:
+                            juz_list = ", ".join(str(n) for n in notification_data['juz_numbers'])
+                            text = (
+                                f"📖 *Добро пожаловать в хатм!*\n\n"
+                                f"Группа: {notification_data['group_name']}\n"
+                                f"Срок: {notification_data['duration_days']} дн.\n\n"
+                                f"Вам назначены джузы: *{juz_list}*\n\n"
+                                f"Да поможет вам Аллах в чтении Корана! 🤲"
+                            )
+                            await notification_service.bot.send_message(
+                                chat_id=notification_data['telegram_id'],
+                                text=text,
+                                parse_mode="Markdown"
+                            )
+                        except Exception as e:
+                            import logging
+                            logging.error(f"Failed to send join notification to {notification_data['telegram_id']}: {e}")
+
+                asyncio.create_task(send_assignment_notification())
 
     return GroupResponse(
         id=group.id,
@@ -409,10 +453,8 @@ async def start_hatm(
     if len(participants) == 0:
         raise HTTPException(status_code=400, detail="В группе нет участников")
 
-    # Ограничиваем количество участников, если указано
-    if hatm.participants_count < len(participants):
-        participants = participants[:hatm.participants_count]
-
+    # Передаём всех текущих участников - сервис сам распределит
+    # и создаст нераспределённые джузы для будущих участников
     hatm = hatm_service.start(hatm, participants)
 
     # Собираем данные для уведомлений до закрытия сессии

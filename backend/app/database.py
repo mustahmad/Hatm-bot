@@ -48,3 +48,32 @@ def init_db():
     """Инициализация базы данных"""
     from app.models import models  # noqa
     Base.metadata.create_all(bind=engine)
+
+    # Автоматические миграции
+    run_migrations()
+
+
+def run_migrations():
+    """Выполнить миграции базы данных"""
+    from sqlalchemy import text
+    import logging
+
+    with engine.connect() as conn:
+        # Миграция: сделать user_id nullable в juz_assignments
+        if "postgresql" in DATABASE_URL:
+            try:
+                # Проверяем, является ли колонка nullable
+                result = conn.execute(text("""
+                    SELECT is_nullable
+                    FROM information_schema.columns
+                    WHERE table_name = 'juz_assignments' AND column_name = 'user_id'
+                """))
+                row = result.fetchone()
+
+                if row and row[0] == 'NO':
+                    # Колонка NOT NULL - нужно изменить
+                    conn.execute(text("ALTER TABLE juz_assignments ALTER COLUMN user_id DROP NOT NULL"))
+                    conn.commit()
+                    logging.info("Migration: user_id in juz_assignments is now nullable")
+            except Exception as e:
+                logging.warning(f"Migration check failed (may be OK on first run): {e}")

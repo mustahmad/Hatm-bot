@@ -13,6 +13,7 @@ export default function CircularTracker({
   const totalJuzs = 30
   const completedJuzs = juzAssignments.filter(j => j.status === 'completed').length
   const debtJuzs = juzAssignments.filter(j => j.status === 'debt' || j.is_debt).length
+  const unassignedJuzs = juzAssignments.filter(j => j.user_id === null).length
   const progressPercent = Math.round((completedJuzs / totalJuzs) * 100)
 
   const radius = (size - 40) / 2
@@ -22,6 +23,7 @@ export default function CircularTracker({
   // Calculate stroke dasharray for progress
   const completedLength = (completedJuzs / totalJuzs) * circumference
   const debtLength = (debtJuzs / totalJuzs) * circumference
+  const unassignedLength = (unassignedJuzs / totalJuzs) * circumference
 
   return (
     <div className="relative" style={{ width: size, height: size }}>
@@ -76,6 +78,22 @@ export default function CircularTracker({
               transform: `rotate(${(completedJuzs / totalJuzs) * 360}deg)`,
               transformOrigin: 'center'
             }}
+          />
+        )}
+
+        {/* Unassigned arc (at the end) */}
+        {unassignedJuzs > 0 && (
+          <circle
+            cx={size / 2}
+            cy={size / 2}
+            r={radius}
+            fill="none"
+            stroke="#93c5fd"
+            strokeWidth={strokeWidth}
+            strokeLinecap="round"
+            strokeDasharray={`${unassignedLength} ${circumference - unassignedLength}`}
+            strokeDashoffset={-circumference + unassignedLength}
+            opacity={0.7}
           />
         )}
 

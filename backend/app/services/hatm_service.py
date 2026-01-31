@@ -41,45 +41,56 @@ class HatmService:
         )
 
     def start(self, hatm: Hatm, participants: List[User]) -> Hatm:
-        """Запустить хатм и распределить джузы"""
+        """
+        Запустить хатм и распределить джузы.
+        Распределение происходит инкрементально:
+        - participants_count определяет сколько джузов на человека (30 / participants_count)
+        - Текущие участники сразу получают свои джузы
+        - Остальные джузы остаются нераспределёнными (user_id = NULL)
+        - По мере вступления новых людей им назначаются джузы из нераспределённых
+        """
         if hatm.status != HatmStatus.PENDING:
             raise ValueError("Хатм уже запущен или завершен")
-
-        if len(participants) == 0:
-            raise ValueError("Нет участников для распределения")
 
         # Установить время начала и окончания
         hatm.started_at = datetime.utcnow()
         hatm.ends_at = hatm.started_at + timedelta(days=hatm.duration_days)
         hatm.status = HatmStatus.ACTIVE
-        hatm.participants_count = len(participants)
 
-        # Распределить 30 джузов между участниками
-        self._distribute_juzs(hatm, participants)
+        # Распределить 30 джузов (часть назначена текущим участникам, часть без назначения)
+        self._distribute_juzs_incremental(hatm, participants)
 
         self.db.commit()
         self.db.refresh(hatm)
         return hatm
 
-    def _distribute_juzs(self, hatm: Hatm, participants: List[User]):
+    def _distribute_juzs_incremental(self, hatm: Hatm, current_participants: List[User]):
         """
-        Распределить 30 джузов между участниками случайным образом.
-        Равное распределение, остаток по одному на участников.
+        Инкрементальное распределение 30 джузов.
+        - participants_count (из hatm) определяет количество джузов на человека
+        - Текущие участники получают свои порции
+        - Остальные джузы создаются с user_id = NULL
         """
         total_juzs = 30
-        num_participants = len(participants)
+        target_participants = hatm.participants_count  # Целевое количество участников
 
         # Создаём список всех джузов и перемешиваем
         juz_numbers = list(range(1, total_juzs + 1))
         random.shuffle(juz_numbers)
 
         # Базовое количество джузов на участника
-        base_juzs = total_juzs // num_participants
+        base_juzs = total_juzs // target_participants
         # Остаток, который нужно распределить
-        remainder = total_juzs % num_participants
+        remainder = total_juzs % target_participants
+
+        # Сколько участников уже есть
+        current_count = min(len(current_participants), target_participants)
 
         juz_index = 0
-        for i, user in enumerate(participants):
+
+        # Раздаём джузы текущим участникам
+        for i in range(current_count):
+            user = current_participants[i]
             # Определяем сколько джузов получает этот участник
             juzs_for_user = base_juzs + (1 if i < remainder else 0)
 
@@ -92,6 +103,80 @@ class HatmService:
                 )
                 self.db.add(assignment)
                 juz_index += 1
+
+        # Создаём нераспределённые джузы (user_id = NULL) для оставшихся слотов
+        for i in range(current_count, target_participants):
+            juzs_for_slot = base_juzs + (1 if i < remainder else 0)
+
+            for _ in range(juzs_for_slot):
+                assignment = JuzAssignment(
+                    hatm_id=hatm.id,
+                    user_id=None,  # Нераспределённый джуз
+                    juz_number=juz_numbers[juz_index],
+                    status=JuzStatus.PENDING
+                )
+                self.db.add(assignment)
+                juz_index += 1
+
+    def get_juzs_per_participant(self, hatm: Hatm) -> int:
+        """Получить количество джузов на одного участника"""
+        return 30 // hatm.participants_count
+
+    def get_assigned_participants_count(self, hatm: Hatm) -> int:
+        """Получить количество участников, которым уже назначены джузы"""
+        result = (
+            self.db.query(JuzAssignment.user_id)
+            .filter(JuzAssignment.hatm_id == hatm.id, JuzAssignment.user_id.isnot(None))
+            .distinct()
+            .count()
+        )
+        return result
+
+    def assign_juzs_to_new_member(self, hatm: Hatm, user: User) -> List[JuzAssignment]:
+        """
+        Назначить джузы новому участнику из нераспределённого пула.
+        Возвращает список назначенных джузов или пустой список если мест нет.
+        """
+        if hatm.status != HatmStatus.ACTIVE:
+            return []
+
+        # Проверяем, не назначены ли уже джузы этому пользователю в этом хатме
+        existing = (
+            self.db.query(JuzAssignment)
+            .filter(JuzAssignment.hatm_id == hatm.id, JuzAssignment.user_id == user.id)
+            .first()
+        )
+        if existing:
+            return []  # У пользователя уже есть джузы
+
+        # Проверяем, есть ли свободные слоты
+        assigned_count = self.get_assigned_participants_count(hatm)
+        if assigned_count >= hatm.participants_count:
+            return []  # Все слоты заняты
+
+        # Определяем сколько джузов нужно назначить
+        base_juzs = 30 // hatm.participants_count
+        remainder = 30 % hatm.participants_count
+        # Новый участник получает столько джузов, сколько положено для его "слота"
+        juzs_for_user = base_juzs + (1 if assigned_count < remainder else 0)
+
+        # Берём нераспределённые джузы
+        unassigned_juzs = (
+            self.db.query(JuzAssignment)
+            .filter(JuzAssignment.hatm_id == hatm.id, JuzAssignment.user_id.is_(None))
+            .limit(juzs_for_user)
+            .all()
+        )
+
+        if len(unassigned_juzs) == 0:
+            return []
+
+        # Назначаем джузы пользователю
+        for juz in unassigned_juzs:
+            juz.user_id = user.id
+
+        self.db.commit()
+        return unassigned_juzs
 
     def get_progress(self, hatm: Hatm) -> HatmProgress:
         """Получить прогресс хатма - оптимизировано с batch загрузкой пользователей"""

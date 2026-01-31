@@ -93,7 +93,7 @@ class JuzAssignment(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     hatm_id = Column(Integer, ForeignKey("hatms.id"), nullable=False, index=True)
-    user_id = Column(Integer, ForeignKey("users.id"), nullable=False, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=True, index=True)  # NULL = unassigned
     juz_number = Column(Integer, nullable=False)  # 1-30
     status = Column(Enum(JuzStatus), default=JuzStatus.PENDING, index=True)
     completed_at = Column(DateTime, nullable=True)

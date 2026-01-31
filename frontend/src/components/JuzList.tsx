@@ -14,19 +14,22 @@ export default function JuzList({
   onComplete,
   isLoading
 }: JuzListProps) {
-  const getStatusColor = (status: string, isDebt: boolean) => {
+  const getStatusColor = (status: string, isDebt: boolean, isUnassigned: boolean) => {
+    if (isUnassigned) return 'bg-blue-300'
     if (status === 'completed') return 'bg-green-500'
     if (status === 'debt' || isDebt) return 'bg-orange-500'
     return 'bg-gray-300'
   }
 
-  const getStatusText = (status: string, isDebt: boolean) => {
+  const getStatusText = (status: string, isDebt: boolean, isUnassigned: boolean) => {
+    if (isUnassigned) return 'Ожидает участника'
     if (status === 'completed') return 'Прочитан'
     if (status === 'debt' || isDebt) return 'Долг'
     return 'Ожидает'
   }
 
-  const getStatusIcon = (status: string, isDebt: boolean) => {
+  const getStatusIcon = (status: string, isDebt: boolean, isUnassigned: boolean) => {
+    if (isUnassigned) return '?'
     if (status === 'completed') return '✓'
     if (status === 'debt' || isDebt) return '!'
     return '○'
@@ -36,6 +39,7 @@ export default function JuzList({
     <div className="space-y-2">
       <AnimatePresence>
         {juzAssignments.map((juz, index) => {
+          const isUnassigned = juz.user_id === null
           const isMyJuz = currentUserId && juz.user_id === currentUserId
           const canComplete = isMyJuz && juz.status !== 'completed'
 
@@ -49,6 +53,7 @@ export default function JuzList({
               className={`
                 card flex items-center justify-between
                 ${isMyJuz ? 'border-green-200 bg-green-50/50' : ''}
+                ${isUnassigned ? 'border-blue-200 bg-blue-50/30' : ''}
                 ${canComplete ? 'cursor-pointer active:scale-[0.98]' : ''}
               `}
               onClick={() => canComplete && onComplete?.(juz)}
@@ -59,12 +64,12 @@ export default function JuzList({
                   className={`
                     w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center flex-shrink-0
                     text-white font-bold text-xs sm:text-sm
-                    ${getStatusColor(juz.status, juz.is_debt)}
+                    ${getStatusColor(juz.status, juz.is_debt, isUnassigned)}
                   `}
                   animate={juz.status === 'completed' ? { scale: [1, 1.1, 1] } : {}}
                   transition={{ duration: 0.3 }}
                 >
-                  {getStatusIcon(juz.status, juz.is_debt)}
+                  {getStatusIcon(juz.status, juz.is_debt, isUnassigned)}
                 </motion.div>
 
                 {/* Juz info */}
@@ -73,8 +78,14 @@ export default function JuzList({
                     Джуз {juz.juz_number}
                   </div>
                   <div className="text-xs sm:text-sm text-gray-500 truncate">
-                    {juz.first_name || juz.username || 'Участник'}
-                    {isMyJuz && <span className="text-green-600 ml-1">(вы)</span>}
+                    {isUnassigned ? (
+                      <span className="text-blue-500 italic">Ожидает участника</span>
+                    ) : (
+                      <>
+                        {juz.first_name || juz.username || 'Участник'}
+                        {isMyJuz && <span className="text-green-600 ml-1">(вы)</span>}
+                      </>
+                    )}
                   </div>
                 </div>
               </div>
@@ -86,9 +97,10 @@ export default function JuzList({
                     text-xs px-2 sm:px-3 py-1 rounded-full font-medium whitespace-nowrap
                     ${juz.status === 'completed' ? 'bg-green-100 text-green-700' : ''}
                     ${juz.status === 'debt' || juz.is_debt ? 'bg-orange-100 text-orange-700' : ''}
-                    ${juz.status === 'pending' && !juz.is_debt ? 'bg-gray-100 text-gray-600' : ''}
+                    ${isUnassigned ? 'bg-blue-100 text-blue-600' : ''}
+                    ${juz.status === 'pending' && !juz.is_debt && !isUnassigned ? 'bg-gray-100 text-gray-600' : ''}
                   `}>
-                    {getStatusText(juz.status, juz.is_debt)}
+                    {getStatusText(juz.status, juz.is_debt, isUnassigned)}
                   </span>
                 )}
 
